@@ -231,10 +231,10 @@ class DefaultController extends Controller {
 	}
 
 	public function actionGetPlaylist($url, $reverse = false) {
-		//if (mb_stripos($url, 'youtube.com/playlist?list=') !== false || (mb_stripos($url, 'youtube.com') !== false && mb_stripos($url, '/videos') !== false)) {
+		if (mb_stripos($url, 'youtube.com/playlist?list=') !== false || (mb_stripos($url, 'youtube.com') !== false && mb_stripos($url, '/videos') !== false)) {
 			$file = Youtube::getPlaylist($url, $reverse);
 			Yii::$app->response->sendFile($file);
-		//}
+		}
 	}
 
 
