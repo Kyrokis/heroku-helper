@@ -89,7 +89,8 @@ echo GridView::widget([
 				} else if ($data->template->name == 'proxyrarbg.org') {
 					$link = 'https://proxyrarbg.org/torrents.php?search=' . $data->link;
 				} else if ($data->template->name == 'rss') {
-					$link = end(explode(',', $data->link));
+					$link = explode(',', $data->link);
+					$link = end($link);
 				}
 				return Html::a($data->title, $link, ['target' => '_blank']) . ' ' . Html::a('<span class="glyphicon glyphicon-time"></span>', ['/helper/default/history', 'ItemsHistory[item_id][]' => $data->id], ['style' => 'color: #6c757d!important;', 'target' => '_blank', 'data-pjax' => '0']);
 			},
