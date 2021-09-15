@@ -160,19 +160,18 @@ class DefaultController extends Controller {
 					'order' => ['chapter' => 'desc'],
 					'includes' => ['manga']
 				];
-				if ($link[1]) {
+				if (isset($link[1]) && $link[1]) {
 					$data['translatedLanguage'] = [$link[1]];
 				}
-				if ($link[2]) {
+				if (isset($link[2]) && $link[2]) {
 					$data['groups'] = [$link[2]];
 				}
 				$client = new Client();
 				$response = $client->get('https://api.mangadex.org/chapter', $data)->send();
-				$content = $response->data['results'][0];
-				//var_dump($content); die;
+				$content = $response->data['data'][0];
 				$items = [
-					'now' => 'Chapter ' . $content['data']['attributes']['chapter'] . ($content['data']['attributes']['title'] ? ': ' . $content['data']['attributes']['title'] : ''),
-					'link_new' => $content['data']['id'],
+					'now' => 'Chapter ' . $content['attributes']['chapter'] . ($content['attributes']['title'] ? ': ' . $content['attributes']['title'] : ''),
+					'link_new' => $content['id'],
 					'link_img' => '',
 				];
 				foreach ($content['relationships'] as $relationship) {
@@ -182,8 +181,9 @@ class DefaultController extends Controller {
 					}
 				}
 			} else if ($template->name == 'rss') {
+				$link = explode(',', $link);
 				$client = new Client();
-				$response = $client->get($link)->send();
+				$response = $client->get($link[0])->send();
 				$content = $response->data['channel'];
 				$items = [
 					'title' => $content['title'],
@@ -328,22 +328,24 @@ class DefaultController extends Controller {
 							'offset' => $value->offset,
 							'order' => ['chapter' => 'desc'],
 						];
-						if (isset($link[1])) {
+						if (isset($link[1]) && $link[1]) {
 							$data['translatedLanguage'] = [$link[1]];
 						}
-						if (isset($link[2])) {
+						if (isset($link[2]) && $link[2]) {
 							$data['groups'] = [$link[2]];
 						}
 						$client = new \yii\httpclient\Client();
 						$response = $client->get('https://api.mangadex.org/chapter', $data)->send();
-						$content = $response->data['results'][0];
+						\Yii::debug($response->data);
+						$content = $response->data['data'][0];
 						$new = [
-							'now' => 'Chapter ' . $content['data']['attributes']['chapter'] . ($content['data']['attributes']['title'] ? ': ' . $content['data']['attributes']['title'] : ''),
-							'link_now' => $content['data']['id']
+							'now' => 'Chapter ' . $content['attributes']['chapter'] . ($content['attributes']['title'] ? ': ' . $content['attributes']['title'] : ''),
+							'link_now' => $content['id']
 						];
 					} else if ($template->name == 'rss') {
+						$link = explode(',', $value->link);
 						$client = new \yii\httpclient\Client();
-						$response = $client->get($value->link)->send();
+						$response = $client->get($link[0])->send();
 						$content = $response->data['channel'];
 						$new = [
 							'now' => $content['item'][$value->offset]['title'],
