@@ -250,7 +250,8 @@ class DefaultController extends Controller {
 		$Thread = new Thread();
 		foreach ($items as $value) {
 			$Thread->Create(function() use($value, $only_new) {
-				$template = app\modules\template\models\Template::findOne($value->id_template);				
+				$media = [];
+				$template = app\modules\template\models\Template::findOne($value->id_template);
 				if ($template->type == 1) {
 					$client = new \yii\httpclient\Client();
 					$response = $client->get($value->link, [], ['timeout' => 10])->send();
@@ -315,11 +316,16 @@ class DefaultController extends Controller {
 										'extended' => 1
 									]);
 						$new['link_now'] = '/wall' . $value->link . '_' . $post['items'][0]['id'];
-						if (isset($post['items'][0]['copy_history'])) {
-							$new['now'] = $post['items'][0]['copy_history'][0]['text'];
-						} else {
-							$new['now'] = $post['items'][0]['text'];
-						}						
+						$post = isset($post['items'][0]['copy_history']) ? $post['items'][0]['copy_history'][0] : $post['items'][0];
+						$new['now'] = $post['text'];
+						foreach ($post['attachments'] as $attachment) {
+							if ($attachment['type'] == 'photo') {
+								$media[] = [
+										'type' => 'photo',
+										'media' => $attachment['photo']['sizes'][6]['url'],
+									];
+							}
+						}				
 					} else if ($template->name == 'mangadex.org') {
 						$link = explode(',', $value->link);
 						$data = [
@@ -440,10 +446,10 @@ class DefaultController extends Controller {
 						}
 						$model->error = '0';
 						$model->save();
-						return ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $new['now'], 'link_new' => $new['link_now'], 'error' => $model->error];
+						return ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $new['now'], 'link_new' => $new['link_now'], 'media' => $media, 'error' => $model->error];
 					}
 				} else if (!$only_new && ($new['now'] != $value->now && $new['now'] == $value->new)) {
-					return ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $value->new, 'link_new' => $value->link_new, 'error' => $value->error];
+					return ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $value->new, 'link_new' => $value->link_new, 'media' => $media, 'error' => $value->error];
 				}
 			});
 		}

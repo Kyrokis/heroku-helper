@@ -189,39 +189,7 @@ class DefaultController extends Controller {
 		return false;
 	}
 
-	public function actionTest() {
-		$response = Yii::$app->telegram->input;
-		Yii::debug(json_encode($response));
-		if (isset($response->message)) {
-			$message = $response->message;
-			$idTelegram = $message['from']['id'];
-			$type = 'message';
-		} else if (isset($response->channel_post)) {
-			$message = $response->channel_post;
-			$idTelegram = $message['sender_chat']['id'];
-			$type = 'channel_post';
-		} else if (isset($response->callback_query)) {
-			$message = $response->callback_query['message'];
-			$idTelegram = $response->callback_query['from']['id'];
-			$type = 'callback_query';
-		}
-		if (isset($response->callback_query['data'])) {
-			$callback_data = json_decode($response->callback_query['data']);
-			$idMessage = $message['message_id'];
-			if ($callback_data->type == 'check') {
-				$model = Items::findOne($callback_data->item_id);
-				$model->now = $model->new;
-				if ($model->save()) {
-					$result = Yii::$app->telegram->editMessageReplyMarkup([
-						'chat_id' => $idTelegram,
-						'message_id' => $idMessage,
-					]);	
-					return Yii::debug($result);
-				}
-			}
-		} else if (!isset($message)) {
-			return false;
-		}
+	public function actionTest() {	
 	}
 
 
@@ -319,6 +287,18 @@ class DefaultController extends Controller {
 					Yii::debug($result);
 					$result = $this->getTorrent($fullLink, $idTelegram);
 					Yii::debug($result);
+					if ($item['media']) {
+						$item['media'][0]['caption'] = $item['title'];
+						try {
+							$result = Yii::$app->telegram->sendMediaGroup([
+									'chat_id' => $idTelegram,
+									'media' => json_encode($item['media']),
+								]); 
+							Yii::debug(json_encode($result));							
+						} catch (ClientException $e) {
+							Yii::debug($e);
+						}						
+					}
 					$out = true;
 				}
 			}
