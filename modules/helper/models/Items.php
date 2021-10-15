@@ -29,6 +29,30 @@ class Items extends ActiveRecord {
 
 	const SCENARIO_SEARCH = 'search';
 
+	const SCENARIO_CREATE = 'create';
+
+	const SCENARIO_MASSUPDATE = 'mass-update';
+
+	/**
+	 * @var string linkSearch
+	 */
+	public $linkSearch;
+
+	/**
+	 * @var string linkReplace
+	 */
+	public $linkReplace;
+
+	/**
+	 * @var string titleSearch
+	 */
+	public $titleSearch;
+
+	/**
+	 * @var string titleReplace
+	 */
+	public $titleReplace;
+
 	/**
 	 * @return string
 	 */
@@ -42,9 +66,10 @@ class Items extends ActiveRecord {
 	public function rules() {
 		return [
 			[['id', 'user_id', 'id_template', 'offset', 'dt_update'], 'integer'],
-			[['title', 'link', 'link_img', 'link_new', 'now', 'new', 'error', 'del'], 'string'],
-			[['title', 'link', 'id_template'], 'required'],
+			[['title', 'link', 'link_img', 'link_new', 'now', 'new', 'error', 'del', 'linkSearch', 'linkReplace', 'titleSearch', 'titleReplace'], 'string'],
+			[['title', 'link', 'id_template'], 'required', 'on' => self::SCENARIO_CREATE],
 			[['title', 'link', 'include', 'exclude'], 'safe', 'on' => self::SCENARIO_SEARCH],
+			[['id'], 'required', 'on' => self::SCENARIO_MASSUPDATE],
 			[['include', 'exclude'], 'safe'],
 		];
 	}
@@ -101,6 +126,10 @@ class Items extends ActiveRecord {
 			'del' => 'Удален',
 			'include' => 'Это должно быть',
 			'exclude' => 'Это не должно быть',
+			'linkSearch' => 'Ссылка что',
+			'linkReplace' => 'Ссылка на что',
+			'titleSearch' => 'Название что',
+			'titleReplace' => 'Название на что',
 		];
 	}
 
@@ -156,7 +185,7 @@ class Items extends ActiveRecord {
 	 * Create DataProvider for GridView.
 	 * @return \yii\data\ActiveDataProvider
 	 */
-	public function search() {
+	public function searchQuery() {
 		//$user_id = Yii::$app->user->identity->admin ? $this->user_id : Yii::$app->user->id;
 		$user_id = $this->user_id;
 		$del = $this->del ? : '0';
@@ -171,7 +200,15 @@ class Items extends ActiveRecord {
 				->andFilterWhere(['ILIKE', 'title', $this->title])
 				->orderBy('user_id, (dt_update is null), (now != new) desc, dt_update desc, id');
 
-		return new \yii\data\ActiveDataProvider(['query' => $query, 'pagination' => false, 'sort' => false]);
+		return $query;
+	}
+
+	/**
+	 * Create DataProvider for GridView.
+	 * @return \yii\data\ActiveDataProvider
+	 */
+	public function search() {
+		return new \yii\data\ActiveDataProvider(['query' => self::searchQuery(), 'pagination' => false, 'sort' => false]);
 	}
 
 	/**

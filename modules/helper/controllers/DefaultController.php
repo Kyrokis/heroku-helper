@@ -13,6 +13,7 @@ use QL\QueryList;
 use VK\Client\VKApiClient;
 use app\components\Str;
 use app\components\youtube\Youtube;
+use yii\helpers\ArrayHelper;
 
 
 /**
@@ -462,6 +463,7 @@ class DefaultController extends Controller {
 	 */
 	public function actionCreate() {
 		$model = new Items();
+		$model->setScenario(Items::SCENARIO_CREATE);
 		if ($model->load(\Yii::$app->request->post()) && $model->save()) {
 			return $this->redirect(['index']);
 		} else if (!$model->offset) {
@@ -477,6 +479,7 @@ class DefaultController extends Controller {
 	 */
 	public function actionUpdate($id) {
 		$model = $this->findModel($id);
+		$model->setScenario(Items::SCENARIO_CREATE);
 		$user = Yii::$app->user;
 		if (!$user->identity->admin && $user->id != $model->user_id) {
 			throw new \yii\web\ForbiddenHttpException('У Вас нет прав на это действие');
@@ -487,6 +490,53 @@ class DefaultController extends Controller {
 			$model->offset = 0;
 		}
 		return $this->render('update', ['model' => $model]);
+	}	
+
+	/**
+	 * Updates an existing Items model.
+	 * @param integer $id
+	 * @return mixed
+	 */
+	public function actionMassUpdate() {
+		$ids = null;
+		$templateId = (isset(\Yii::$app->request->get()['id_template']) && count(\Yii::$app->request->get()['id_template']) == 1) ? \Yii::$app->request->get()['id_template'] : null;
+		if (\Yii::$app->request->get() && count(\Yii::$app->request->get()) > 1) {
+			$modelIds = new Items();
+			$modelIds->setScenario(Items::SCENARIO_SEARCH);
+			$modelIds->load(\Yii::$app->request->get(), '');
+			$modelIds->user_id = Yii::$app->user->id;
+			$result = $modelIds->searchQuery()->all();
+			$ids = ArrayHelper::getColumn($result, 'id');
+		}
+		$model = new Items();
+		$model->setScenario(Items::SCENARIO_MASSUPDATE);
+		$model->id = $ids;
+		$model->id_template = $templateId;
+		$attrs = ['id_template', 'offset', 'include', 'exclude', 'user_id'];
+		if ($model->load(\Yii::$app->request->post())) {
+			foreach ($model->id as $id) {
+				$item = $this->findModel($id);
+				foreach ($attrs as $attr) {
+					if ($model->{$attr}) {
+						if ($attr == 'include' || $attr == 'exclude') {
+							$value = $item->{$attr}->getValue();
+							$item->{$attr} = array_merge($value, $model->{$attr});
+						} else {
+							$item->{$attr} = $model->{$attr};
+						}
+					}
+					if ($model->linkSearch && $model->linkReplace) {
+						$item->link = str_replace($model->linkSearch, $model->linkReplace, $item->link);
+					}
+					if ($model->titleSearch && $model->titleReplace) {
+						$item->title = str_replace($model->titleSearch, $model->titleReplace, $item->title);
+					}
+					$item->save();
+				}
+			}
+			return $this->redirect(['index']);
+		}
+		return $this->render('mass-update', ['model' => $model]);
 	}
 
 	/**

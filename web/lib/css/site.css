@@ -367,22 +367,26 @@ form .form-group.required label.control-label:after {
 
 /* width */
 .calendar table td .model-box::-webkit-scrollbar {
-  width: 10px;
+	width: 10px;
 }
 
 /* Track */
 .calendar table td .model-box::-webkit-scrollbar-track {
-  background: #f1f1f1;
+	background: #f1f1f1;
 }
 
 /* Handle */
 .calendar table td .model-box::-webkit-scrollbar-thumb {
-  background: #888;
+	background: #888;
 }
 
 /* Handle on hover */
 .calendar table td .model-box::-webkit-scrollbar-thumb:hover {
-  background: #555;
+	background: #555;
+}
+
+.list-inline > li {
+	padding-right: 0;
 }
 
 /*----- @MEDIA -----*/

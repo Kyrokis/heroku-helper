@@ -148,7 +148,7 @@ $title = isset($this->context->title) ? $this->context->title : '';
 						echo Nav::widget([
 							'encodeLabels' => false,
 							'items' => $menuSide,
-							'options' => ['class' => ['widget' => 'pull-left list-unstyled list-inline'], 'style' => 'margin: 4px 15px 15px 0'], // set this to nav-tab to get tab-styled navigation
+							'options' => ['class' => ['widget' => 'pull-left list-unstyled list-inline'], 'style' => 'margin: 4px 0 15px 0'], // set this to nav-tab to get tab-styled navigation
 						]);
 						?>
 		

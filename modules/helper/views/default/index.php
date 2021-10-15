@@ -14,6 +14,9 @@ use app\modules\template\models\Template;
 $this->params['breadcrumbs'][] = $this->context->title;
 $this->params['menuSide']['create'] = true;
 
+$editUrl = $model->attributes;
+array_unshift($editUrl, 'mass-update');
+
 echo GridView::widget([
 	'dataProvider' => $model->search(),
 	'filterModel' => $model,
@@ -22,7 +25,13 @@ echo GridView::widget([
 	'striped' => false,
 	'toolbar' => [
 		[
-			'content' => Html::a('Ожидания', ['/helper/default/calendar'], [
+			'content' => Html::a('Редактировать', $editUrl, [
+								'class' => 'btn btn-default',
+								'style' => 'margin-right: 10px;',
+								'data-pjax' => '0',
+								'target' => '_blank'
+							]) . ' ' .
+						Html::a('Ожидания', ['/helper/default/calendar'], [
 								'class' => 'btn btn-default',
 								'data-pjax' => '0',
 								'target' => '_blank'
