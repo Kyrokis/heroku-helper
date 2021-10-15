@@ -499,7 +499,6 @@ class DefaultController extends Controller {
 	 */
 	public function actionMassUpdate() {
 		$ids = null;
-		$templateId = (isset(\Yii::$app->request->get()['id_template']) && count(\Yii::$app->request->get()['id_template']) == 1) ? \Yii::$app->request->get()['id_template'] : null;
 		if (\Yii::$app->request->get() && count(\Yii::$app->request->get()) > 1) {
 			$modelIds = new Items();
 			$modelIds->setScenario(Items::SCENARIO_SEARCH);
@@ -511,7 +510,6 @@ class DefaultController extends Controller {
 		$model = new Items();
 		$model->setScenario(Items::SCENARIO_MASSUPDATE);
 		$model->id = $ids;
-		$model->id_template = $templateId;
 		$attrs = ['id_template', 'offset', 'include', 'exclude', 'user_id'];
 		if ($model->load(\Yii::$app->request->post())) {
 			foreach ($model->id as $id) {

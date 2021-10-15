@@ -20,7 +20,8 @@ $attributes = [
 		'widgetClass' => Select2::classname(),
 		'options' => [
 			'data' => Items::all(),
-			'options' => ['multiple' => true]
+			'options' => ['multiple' => true],
+			'pluginOptions' => ['placeholder' => '',  'allowClear' => true]
 		],
 	],
 	[
