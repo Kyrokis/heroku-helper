@@ -277,18 +277,9 @@ class DefaultController extends Controller {
 						]],
 						'resize_keyboard' => true,
 					];
-					$result = Yii::$app->telegram->sendMessage([
-						'chat_id' => $idTelegram,
-						'text' => "<b>$item[title]</b>: $linkText",
-						'parse_mode' => 'HTML',
-						'disable_web_page_preview' => true,
-						'reply_markup' => json_encode($reply_markup),
-					]);
-					Yii::debug($result);
-					$result = $this->getTorrent($fullLink, $idTelegram);
-					Yii::debug($result);
 					if ($item['media']) {
-						$item['media'][0]['caption'] = $item['title'];
+						$item['media'][0]['caption'] = "<b>$item[title]</b> \n$linkText";
+						$item['media'][0]['parse_mode'] = 'HTML';
 						try {
 							$result = Yii::$app->telegram->sendMediaGroup([
 									'chat_id' => $idTelegram,
@@ -298,7 +289,18 @@ class DefaultController extends Controller {
 						} catch (ClientException $e) {
 							Yii::debug($e);
 						}						
+					} else {
+						$result = Yii::$app->telegram->sendMessage([
+							'chat_id' => $idTelegram,
+							'text' => "<b>$item[title]</b> \n$linkText",
+							'parse_mode' => 'HTML',
+							'disable_web_page_preview' => true,
+							'reply_markup' => json_encode($reply_markup),
+						]);
+						Yii::debug($result);
 					}
+					$result = $this->getTorrent($fullLink, $idTelegram);
+					Yii::debug($result);
 					$out = true;
 				}
 			}
