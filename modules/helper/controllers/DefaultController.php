@@ -321,10 +321,11 @@ class DefaultController extends Controller {
 						$new['now'] = $post['text'];
 						foreach ($post['attachments'] as $attachment) {
 							if ($attachment['type'] == 'photo') {
+								$sizes = array_filter($attachment['photo']['sizes'], fn($key) => ($key['type'] == 'w' || $key['type'] == 'z'));
 								$media[] = [
-										'type' => 'photo',
-										'media' => $attachment['photo']['sizes'][6]['url'],
-									];
+									'type' => 'photo',
+									'media' => array_values($sizes)[0]['url'],
+								];
 							}
 						}				
 					} else if ($template->name == 'mangadex.org') {
