@@ -298,10 +298,10 @@ class DefaultController extends Controller {
 							}
 						}
 						$offset++;
-						if ($offset > 10) {
+						if ($offset > $value->offset + 9) {
 							$check = true;
 							$new = [
-								'now' => $value->now,
+								'now' => $value->new,
 								'link_now' => $value->link_new
 							];
 						}
@@ -309,17 +309,64 @@ class DefaultController extends Controller {
 				} else if ($template->type == 2) {
 					if ($template->name == 'vk.com') {
 						$vk = new \VK\Client\VKApiClient();
+						$offset = $value->offset;
 						$post = $vk->wall()->get(\Yii::$app->params['vkApiKey'], [
 										'owner_id' => $value->link,
-										'offset' => $value->offset,
-										'count' => 1,
+										'offset' => $offset,
+										'count' => 10,
 										'filter' => 'owner',
 										'extended' => 1
 									]);
-						$new['link_now'] = '/wall' . $value->link . '_' . $post['items'][0]['id'];
-						$post = isset($post['items'][0]['copy_history']) ? $post['items'][0]['copy_history'][0] : $post['items'][0];
-						$new['now'] = $post['text'];
-						foreach ($post['attachments'] as $attachment) {
+						do {
+							$item = isset($post['items'][$offset]['copy_history']) ? $post['items'][$offset]['copy_history'][0] : $post['items'][$offset];
+							$new = [
+								'now' => $item['text'],
+								'link_now' => '/wall' . $value->link . '_' . $item['id']
+							];
+							if ($new['now'] == $value->now && $offset != $value->offset) {
+								$check = true;
+							}
+							if ((count($value->include) == 0 && count($value->exclude) == 0)) {
+								$check = true;
+							} else {
+								if (count($value->exclude) > 0) {
+									$excludeCheck = true;
+									foreach ($value->exclude as $word) {
+										if (mb_strpos(mb_strtolower($new['now']), mb_strtolower($word)) !== false) {
+											$excludeCheck = false;
+										}
+									}
+									if ($excludeCheck) {
+										$check = true;
+									} else {
+										$check = false;
+									}
+								}
+								if (count($value->include) > 0) {
+									foreach ($value->include as $word) {
+										$includeCheck = false;
+										if (mb_strpos(mb_strtolower($new['now']), mb_strtolower($word)) !== false) {
+											$includeCheck = true;
+										}
+									}
+									if ($includeCheck) {
+										$check = true;
+									} else {
+										$check = false;
+									}
+								}
+							}
+							$offset++;
+							if ($offset > $value->offset + 9) {
+								$check = true;
+								$new = [
+									'now' => $value->new,
+									'link_now' => $value->link_new
+								];
+							}
+						} while (!$check);
+						\Yii::debug($offset);
+						foreach ($item['attachments'] as $attachment) {
 							if ($attachment['type'] == 'photo') {
 								$sizes = array_filter($attachment['photo']['sizes'], fn($key) => ($key['type'] == 'w' || $key['type'] == 'z'));
 								$media[] = [
@@ -327,7 +374,7 @@ class DefaultController extends Controller {
 									'media' => array_values($sizes)[0]['url'],
 								];
 							}
-						}				
+						}
 					} else if ($template->name == 'mangadex.org') {
 						$link = explode(',', $value->link);
 						$data = [
