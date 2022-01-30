@@ -177,7 +177,7 @@ class DefaultController extends Controller {
 				];
 				foreach ($content['relationships'] as $relationship) {
 					if ($relationship['type'] == 'manga') {
-						$items['title'] = $relationship['attributes']['title']['en'];
+						$items['title'] = isset($relationship['attributes']['title']['ja']) ? $relationship['attributes']['title']['ja'] : $relationship['attributes']['title']['en'];
 						break;
 					}
 				}
