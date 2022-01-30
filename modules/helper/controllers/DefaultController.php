@@ -309,14 +309,14 @@ class DefaultController extends Controller {
 				} else if ($template->type == 2) {
 					if ($template->name == 'vk.com') {
 						$vk = new \VK\Client\VKApiClient();
-						$offset = $value->offset;
 						$post = $vk->wall()->get(\Yii::$app->params['vkApiKey'], [
 										'owner_id' => $value->link,
-										'offset' => $offset,
+										'offset' => $value->offset,
 										'count' => 10,
 										'filter' => 'owner',
 										'extended' => 1
 									]);
+						$offset = 0;
 						do {
 							$item = isset($post['items'][$offset]['copy_history']) ? $post['items'][$offset]['copy_history'][0] : $post['items'][$offset];
 							$new = [

@@ -389,6 +389,10 @@ form .form-group.required label.control-label:after {
 	padding-right: 0;
 }
 
+.kv-table-header, .kv-table-footer {
+    background: #fff;
+}
+
 /*----- @MEDIA -----*/
 @media (min-width: 992px) {
 	.s-table-img:hover {
