@@ -25,6 +25,8 @@ var site = {};
 			'link': $('#items-link').val(),
 			'id_template': $('#items-id_template').val(),
 			'offset': $('#items-offset').val(),
+			'include': JSON.stringify($('#items-include').val()),
+			'exclude': JSON.stringify($('#items-exclude').val()),
 		}).done(function (data) {
 			data = JSON.parse(data);
 			console.log(data);
@@ -124,11 +126,12 @@ var site = {};
 
 $(function () {
 	$('body').on('click', '.send-msg', site.sendMessage);
-	$('body').on('click', '.get-data', site.getData);
 	$('body').on('click', '.helping', site.helping);
 	$('body').on('click', '.check', site.check);
 	$('body').on('click', '.copy', site.copy);
-	$('body').on('submit', '.items-add', site.selectAll);
 	$('body').on('click', '.del-word', site.delWord);
 	$('body').on('click', '.add-word', site.addWord);
+	$('body').on('submit', '.items-add', site.selectAll);
+	$('body').on('click', '.get-data', site.selectAll);
+	$('body').on('click', '.get-data', site.getData);
 });

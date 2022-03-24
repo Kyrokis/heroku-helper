@@ -120,7 +120,9 @@ class DefaultController extends Controller {
 	 * Get Data
 	 * @return json
 	 */
-	public function actionGetData($link, $id_template, $offset = 0) {
+	public function actionGetData($link, $id_template, $offset = 0, $include = null, $exclude = null) {
+		$include = json_decode($include);
+		$exclude = json_decode($exclude);
 		$template = Template::findOne($id_template);
 		if ($template->type == 1) {
 			$client = new Client();
@@ -128,17 +130,27 @@ class DefaultController extends Controller {
 			$content = $response->content;
 			$items = [
 				'title' => Str::explode($template->title, $content),
-				'now' => Str::explode($template->new, $content, $offset),
-				'link_new' => Str::explode($template->link_new, $content, $offset),
 				'link_img' => Str::explode($template->link_img, $content),
-			];	
+			];
+			$offsetCycle = $offset;
+			do {
+				$items['now'] = Str::explode($template->new, $content, $offsetCycle);
+				$items['link_new'] = Str::explode($template->link_new, $content, $offsetCycle);
+				$check = self::checkClude($items['now'], $exclude, $include);
+				$offsetCycle++;
+				if ($offsetCycle > $offset + 9) {
+					$check = true;
+					$items['now'] = Str::explode($template->new, $content, $offset);
+					$items['link_new'] = Str::explode($template->link_new, $content, $offset);
+				}
+			} while (!$check);
 		} else if ($template->type == 2) {
 			if ($template->name == 'vk.com') {
 				$vk = new VKApiClient();
 				$post = $vk->wall()->get(\Yii::$app->params['vkApiKey'], [
 								'owner_id' => $link,
 								'offset' => $offset,
-								'count' => 1,
+								'count' => 10,
 								'filter' => 'owner',
 								'extended' => 1
 							]);
@@ -146,12 +158,21 @@ class DefaultController extends Controller {
 					'title' => $post['groups'][0]['name'],
 					'link_img' => $post['groups'][0]['photo_200'],
 					'link_new' => '/wall' . $link . '_' . $post['items'][0]['id'],
-				];	
-				if (isset($post['items'][0]['copy_history'])) {
-					$items['now'] = $post['items'][0]['copy_history'][0]['text'];
-				} else {
-					$items['now'] = $post['items'][0]['text'];
-				}				
+				];
+				$offsetCycle = 0;
+				do {
+					$item = isset($post['items'][$offsetCycle]['copy_history']) ? $post['items'][$offsetCycle]['copy_history'][0] : $post['items'][$offsetCycle];
+					$items['now'] = $item['text'];
+					$items['link_new'] = '/wall' . $link . '_' . $item['id'];
+					$check = self::checkClude($items['now'], $exclude, $include);
+					$offsetCycle++;
+					if ($offsetCycle > $offset + 9) {
+						$check = true;
+						$item = isset($post['items'][0]['copy_history']) ? $post['items'][0]['copy_history'][0] : $post['items'][0];
+						$items['now'] = $item['text'];
+						$items['link_new'] = '/wall' . $link . '_' . $item['id'];
+					}
+				} while (!$check);
 			} else if ($template->name == 'mangadex.org') {
 				$link = explode(',', $link);
 				$data = [
@@ -204,18 +225,49 @@ class DefaultController extends Controller {
 				];	
 			}
 		} else {
-			foreach ($template->attributes as $key => $attribute) {
-				if (is_object($attribute)) {
-					$template->$key[0] = str_replace('{offset}', $offset, $template->$key[0]);
-				}
-			}
-			$items = QueryList::get($link)->rules([ 
-							'title' => $template->title,
-							'now' => $template->new,
-							'link_new' => $template->link_new,
-							'link_img' => $template->link_img,
+			$query = QueryList::get($link);
+			$items = $query->rules([ 
+							'title' => $template->title, 
+							'link_img' => $template->link_img
 						])
 						->query()->getData()->all();
+			$offsetCycle = $offset;
+			do {
+				//
+				$newTemplate = [
+					'new' => $template->new->getValue(),
+					'link_new' => $template->link_new->getValue(),
+				];
+				$newTemplate['new'][0] = str_replace('{offset}', $offsetCycle, $newTemplate['new'][0]);
+				$newTemplate['link_new'][0] = str_replace('{offset}', $offsetCycle, $newTemplate['link_new'][0]);
+				$item = $query->rules([
+							'now' => $newTemplate['new'], 
+							'link_now' => $newTemplate['link_new']
+						])
+						->query()->getData()->all();
+				$items['now'] = $item['now'];
+				$items['link_new'] = $item['link_now'];
+				//
+				$check = self::checkClude($items['now'], $exclude, $include);
+				$offsetCycle++;
+				if ($offsetCycle > $offset + 9) {
+					$check = true;
+					//
+					foreach ($template->attributes as $key => $attribute) {
+						if (is_object($attribute)) {
+							$template->$key[0] = str_replace('{offset}', $offset, $template->$key[0]);
+						}
+					}
+					$item = $query->rules([
+							'now' => $template->new, 
+							'link_now' => $template->link_new
+						])
+						->query()->getData()->all();
+					$items['now'] = $item['now'];
+					$items['link_new'] = $item['link_now'];
+					//
+				}
+			} while (!$check);
 		}
 		$items['now'] = ($items['now'] != '') ? $items['now'] : $items['link_new'];
 		return json_encode($items);
@@ -266,37 +318,9 @@ class DefaultController extends Controller {
 						];
 						if ($new['now'] == $value->now && $offset != $value->offset) {
 							$check = true;
+							break;
 						}
-						if ((count($value->include) == 0 && count($value->exclude) == 0)) {
-							$check = true;
-						} else {
-							if (count($value->exclude) > 0) {
-								$excludeCheck = true;
-								foreach ($value->exclude as $word) {
-									if (mb_strpos(mb_strtolower($new['now']), mb_strtolower($word)) !== false) {
-										$excludeCheck = false;
-									}
-								}
-								if ($excludeCheck) {
-									$check = true;
-								} else {
-									$check = false;
-								}
-							}
-							if (count($value->include) > 0) {
-								foreach ($value->include as $word) {
-									$includeCheck = false;
-									if (mb_strpos(mb_strtolower($new['now']), mb_strtolower($word)) !== false) {
-										$includeCheck = true;
-									}
-								}
-								if ($includeCheck) {
-									$check = true;
-								} else {
-									$check = false;
-								}
-							}
-						}
+						$check = \app\modules\helper\controllers\DefaultController::checkClude($new['now'], $value->exclude, $value->include);
 						$offset++;
 						if ($offset > $value->offset + 9) {
 							$check = true;
@@ -325,37 +349,9 @@ class DefaultController extends Controller {
 							];
 							if ($new['now'] == $value->now && $offset != $value->offset) {
 								$check = true;
+								break;
 							}
-							if ((count($value->include) == 0 && count($value->exclude) == 0)) {
-								$check = true;
-							} else {
-								if (count($value->exclude) > 0) {
-									$excludeCheck = true;
-									foreach ($value->exclude as $word) {
-										if (mb_strpos(mb_strtolower($new['now']), mb_strtolower($word)) !== false) {
-											$excludeCheck = false;
-										}
-									}
-									if ($excludeCheck) {
-										$check = true;
-									} else {
-										$check = false;
-									}
-								}
-								if (count($value->include) > 0) {
-									foreach ($value->include as $word) {
-										$includeCheck = false;
-										if (mb_strpos(mb_strtolower($new['now']), mb_strtolower($word)) !== false) {
-											$includeCheck = true;
-										}
-									}
-									if ($includeCheck) {
-										$check = true;
-									} else {
-										$check = false;
-									}
-								}
-							}
+							$check = \app\modules\helper\controllers\DefaultController::checkClude($new['now'], $value->exclude, $value->include);
 							$offset++;
 							if ($offset > $value->offset + 9) {
 								$check = true;
@@ -431,42 +427,13 @@ class DefaultController extends Controller {
 									'link_now' => $newTemplate['link_now']
 								])
 								->query()->getData()->all();
-
 						if ($new['now'] == $value->now && $offset != $value->offset) {
 							$check = true;
+							break;
 						}
-						if ((count($value->include) == 0 && count($value->exclude) == 0)) {
-							$check = true;
-						} else {
-							if (count($value->exclude) > 0) {
-								$excludeCheck = true;
-								foreach ($value->exclude as $word) {
-									if (mb_strpos(mb_strtolower($new['now']), mb_strtolower($word)) !== false) {
-										$excludeCheck = false;
-									}
-								}
-								if ($excludeCheck) {
-									$check = true;
-								} else {
-									$check = false;
-								}
-							}
-							if (count($value->include) > 0) {
-								foreach ($value->include as $word) {
-									$includeCheck = false;
-									if (mb_strpos(mb_strtolower($new['now']), mb_strtolower($word)) !== false) {
-										$includeCheck = true;
-									}
-								}
-								if ($includeCheck) {
-									$check = true;
-								} else {
-									$check = false;
-								}
-							}
-						}
+						$check = \app\modules\helper\controllers\DefaultController::checkClude($new['now'], $value->exclude, $value->include);
 						$offset++;
-						if ($offset > 10) {
+						if ($offset > $value->offset + 9) {
 							$check = true;
 							$new = [
 								'now' => $value->now,
@@ -684,6 +651,42 @@ class DefaultController extends Controller {
 		throw new \yii\web\NotFoundHttpException('The requested page does not exist.');
 	}
 
+
+	public static function checkClude($value, $exclude, $include) {
+		if ((count($include) == 0 && count($exclude) == 0)) {
+			$check = true;
+		} else {
+			if (count($exclude) > 0) {
+				$excludeCheck = true;
+				foreach ($exclude as $word) {
+					if (mb_strpos(mb_strtolower($value), mb_strtolower($word)) !== false) {
+						$excludeCheck = false;
+						break;
+					}
+				}
+				if ($excludeCheck) {
+					$check = true;
+				} else {
+					$check = false;
+				}
+			}
+			if (count($include) > 0) {
+				foreach ($include as $word) {
+					$includeCheck = false;
+					if (mb_strpos(mb_strtolower($value), mb_strtolower($word)) !== false) {
+						$includeCheck = true;
+						break;
+					}
+				}
+				if ($includeCheck) {
+					$check = true;
+				} else {
+					$check = false;
+				}
+			}
+		}
+		return $check;
+	}
 
 	private function copyModel($model) {
 		$newModel = new Items();
