@@ -113,7 +113,6 @@ class DefaultController extends Controller {
 	 * @return json
 	 */
 	public function actionWebhookPage() {
-		return true;
 		$response = Yii::$app->telegram->input;
 		Yii::debug(json_encode($response));
 		if (isset($response->message)) {
@@ -155,6 +154,7 @@ class DefaultController extends Controller {
 		} else if ($message['text'] == '/show_keyboard') {
 			$this->showKeyboard($idTelegram);
 		} else if ($message['text'] == '/update') {
+			return true;
 			$this->update($idTelegram);
 		}
 
