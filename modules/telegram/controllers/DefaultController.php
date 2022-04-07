@@ -113,6 +113,7 @@ class DefaultController extends Controller {
 	 * @return json
 	 */
 	public function actionWebhookPage() {
+		return true;
 		$response = Yii::$app->telegram->input;
 		Yii::debug(json_encode($response));
 		if (isset($response->message)) {
