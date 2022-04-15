@@ -365,10 +365,13 @@ class DefaultController extends Controller {
 						foreach ($item['attachments'] as $attachment) {
 							if ($attachment['type'] == 'photo') {
 								$sizes = array_filter($attachment['photo']['sizes'], fn($key) => ($key['type'] == 'w' || $key['type'] == 'z'));
-								$media[] = [
-									'type' => 'photo',
-									'media' => array_values($sizes)[0]['url'],
-								];
+								\Yii::debug($sizes);
+								if ($sizes) {
+									$media[] = [
+										'type' => 'photo',
+										'media' => array_values($sizes)[0]['url'],
+									];									
+								}
 							}
 						}
 					} else if ($template->name == 'mangadex.org') {
