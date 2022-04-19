@@ -307,7 +307,7 @@ class DefaultController extends Controller {
 				$template = app\modules\template\models\Template::findOne($value->id_template);
 				if ($template->type == 1) {
 					$client = new \yii\httpclient\Client();
-					$response = $client->get($value->link, [], ['timeout' => 10])->send();
+					$response = $client->get($value->link, [], ['timeout' => 5])->send();
 					$content = $response->content;
 					$check = false;
 					$offset = $value->offset;
@@ -415,7 +415,7 @@ class DefaultController extends Controller {
 						];	
 					}
 				} else {
-					$query = \QL\QueryList::get($value->link, null, ['timeout' => 10]);
+					$query = \QL\QueryList::get($value->link, null, ['timeout' => 5]);
 					$check = false;
 					$offset = $value->offset;
 					do {
