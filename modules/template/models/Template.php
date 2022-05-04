@@ -6,6 +6,7 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use app\modules\user\models\User;
+use app\modules\helper\models\Items;
 
 /**
  * This is the model class for table "template".
@@ -109,6 +110,23 @@ class template extends ActiveRecord {
 	public function getUser() {
 		return $this->hasOne(User::className(), ['id' => 'user_id']);
 	}
+
+	/**
+	 * Items
+	 * @return \app\models\ItemsHistory
+	 */
+	public function getItems() {
+		return $this->hasMany(Items::className(), ['id_template' => 'id'])->where(['items.del' => '0']);
+	}
+
+	/**
+	 * User items
+	 * @return \app\models\ItemsHistory
+	 */
+	public function getUserItems() {
+		return $this->hasMany(Items::className(), ['id_template' => 'id'])->where(['items.user_id' => Yii::$app->user->id, 'items.del' => '0']);
+	}
+
 
 	/**
 	 * @return array
@@ -227,6 +245,20 @@ class template extends ActiveRecord {
 			$query->andWhere(['OR', ['user_id' => $user_id], ['IS', 'user_id', null]]);
 		}
 		return new \yii\data\ActiveDataProvider(['query' => $query, 'pagination' => false, 'sort' => false]);
+	}
+
+	/**
+	 * Получить список вида id => name
+	 * @return array
+	 */
+	public static function sortedAll() {
+		$query = self::find()
+					->joinWith('userItems')
+					->select(['template.*', new \yii\db\Expression('COUNT(items.id) AS items_count')])
+					->andWhere(['OR', ['template.user_id' => Yii::$app->user->id], ['IS', 'template.user_id', null]])->andWhere(['template.del' => '0'])
+					->groupBy('template.id')
+					->orderBy('items_count DESC');
+		return ArrayHelper::map($query->all(), 'id', 'name');
 	}
 
 	/**

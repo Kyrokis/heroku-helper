@@ -116,7 +116,7 @@ echo GridView::widget([
 			},
 			'width' => '200px',
 			'filterType' => GridView::FILTER_SELECT2,
-			'filter' => Template::all(), 
+			'filter' => Template::sortedAll(), 
 			'filterWidgetOptions' => [
 				'pluginOptions' => ['placeholder' => '',  'allowClear' => true],
 			],

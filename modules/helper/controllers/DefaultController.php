@@ -173,6 +173,24 @@ class DefaultController extends Controller {
 						$items['link_new'] = '/wall' . $link . '_' . $item['id'];
 					}
 				} while (!$check);
+				//$sizes = ['w' => 0, 'z' => 1, 'y' => 2, 'r' => 3, 'q' => 4, 'p' => 5, 'o' => 6, 'x' => 7, 'm' => 8, 's' => 9];
+				$sizes = ['w', 'z', 'y', 'r', 'q', 'p', 'o', 'x', 'm', 's'];
+				foreach ($item['attachments'] as $attachment) {
+					if ($attachment['type'] == 'photo') {
+						foreach ($attachment['photo']['sizes'] as $size) {
+							$url[array_search($size['type'], $sizes)] = $size['url'];
+						}
+						//$sizes = array_filter($attachment['photo']['sizes'], fn($key) => ($key['type'] == 'w' || $key['type'] == 'z'));
+						\Yii::debug($sizes);
+						if ($url) {
+							ksort($url);
+							$media[] = [
+								'type' => 'photo',
+								'media' => array_values($url)[0],
+							];									
+						}
+					}
+				}
 			} else if ($template->name == 'mangadex.org') {
 				$link = explode(',', $link);
 				$data = [
@@ -225,7 +243,9 @@ class DefaultController extends Controller {
 				];	
 			}
 		} else {
-			$query = QueryList::get($link);
+			//$query = QueryList::get($link);
+			$html = QueryList::get($link, null, ['timeout' => 5])->getHtml();
+			$query = QueryList::html($html);
 			$items = $query->rules([ 
 							'title' => $template->title, 
 							'link_img' => $template->link_img
@@ -415,7 +435,8 @@ class DefaultController extends Controller {
 						];	
 					}
 				} else {
-					$query = \QL\QueryList::get($value->link, null, ['timeout' => 5]);
+					$html = \QL\QueryList::get($value->link, null, ['timeout' => 5])->getHtml();
+					$query = \QL\QueryList::html($html);
 					$check = false;
 					$offset = $value->offset;
 					do {

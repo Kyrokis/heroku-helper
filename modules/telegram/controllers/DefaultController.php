@@ -389,67 +389,6 @@ class DefaultController extends Controller {
 					}
 				}
 			}
-		// anilibria
-		} else if (mb_stripos($url, $this->sites['anilibria']) !== false) {
-			try {
-				$items = QueryList::get($url)->rules([ 
-												'link' => ['.torrentcol4 > a', 'href']
-											])
-											->range('#publicTorrentTable > tr')->query()->getData()->all();
-			}
-			catch (ClientException $e) {
-				Yii::error($e->getMessage());
-			}
-			Yii::debug($items);
-			if ($items) {
-				foreach ($items as $item) {
-					$result = Yii::$app->telegram->sendDocument([
-						'chat_id' => $idTelegram,
-						'document' => $this->loadFile($this->sites['anilibria'] . $item['link']),
-					]);
-					Yii::debug($item);
-					Yii::debug(json_encode($result));
-				}				
-			}
-		// erai raws
-		} else if (mb_stripos($url, $this->sites['erairaws']) !== false) {
-			$show_all = 0;
-			if ($user = User::find()->where(['id_telegram' => $idTelegram, 'del' => '0'])->one()) {
-				$show_all = $user->show_all;
-			}
-			if (mb_stripos($url, '/posts/') !== false) {
-				$range = '.era_center';
-			} else if (mb_stripos($url, '/anime-list/') !== false) {
-				$range = '.h-episodes > .era_center';
-			}
-			try {
-				$items = QueryList::get($url)->rules([ 
-							'link' => ['.dl-link > a', 'href']
-						])
-						->range($range . ($show_all ? '' : ':first'))->query()->getData()->all();
-			}
-			catch (ClientException $e) {
-				Yii::error($e->getMessage());
-			}
-			Yii::debug($items);
-			if ($items) {
-				foreach ($items as $item) {
-					$result = Yii::$app->telegram->sendDocument([
-						'chat_id' => $idTelegram,
-						'document' => $this->loadFile($item['link'])
-					]);
-					Yii::debug($item);
-					Yii::debug(json_encode($result));
-					if (!$result) {
-						Yii::debug('Что-то пошло не так и отправляю ссылку');
-						$result = Yii::$app->telegram->sendMessage([
-							'chat_id' => $idTelegram,
-							'text' => $item['link'],
-						]); 
-						Yii::debug($result);
-					}
-				}				
-			}
 		}
 	}
 
