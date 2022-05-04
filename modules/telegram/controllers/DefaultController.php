@@ -146,16 +146,17 @@ class DefaultController extends Controller {
 			return false;
 		}
 
-		
-		if ($message['text'] == '/get_id') {
-			$this->getId($idTelegram);
-		} else if ($message['text'] == '/change_mode') {
-			$this->changeMode($idTelegram);
-		} else if ($message['text'] == '/show_keyboard') {
-			$this->showKeyboard($idTelegram);
-		} else if ($message['text'] == '/update') {
-			return true;
-			$this->update($idTelegram);
+		if (isset($message['text'])) {
+			if ($message['text'] == '/get_id') {
+				$this->getId($idTelegram);
+			} else if ($message['text'] == '/change_mode') {
+				$this->changeMode($idTelegram);
+			} else if ($message['text'] == '/show_keyboard') {
+				$this->showKeyboard($idTelegram);
+			} else if ($message['text'] == '/update') {
+				return true;
+				$this->update($idTelegram);
+			} 			
 		}
 
 		$urls = [];
