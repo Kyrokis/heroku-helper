@@ -14,6 +14,7 @@ use Google_Client;
 use Google_Service_Drive;
 use Google_Service_Exception;
 use app\components\youtube\Youtube;
+use app\components\Str;
 
 /**
  * Controller for telegram module
@@ -408,6 +409,7 @@ class DefaultController extends Controller {
 				} else {
 					$filename = $tempName . '.' . explode('/', $contentType)[1];
 				}
+				$filename = str_replace('x-bittorrent', 'torrent', $filename);
 			}
 			rename($file, Yii::$app->basePath . '/uploads/' . $filename);
 			return Yii::$app->basePath . '/uploads/' . $filename;
