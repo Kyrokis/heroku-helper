@@ -723,7 +723,7 @@ class DefaultController extends Controller {
 		return false;
 	}
 
-	public function actionDownload($url) {
+	public function actionDownload($url, $text = false) {
 		$headers;
 		$tempName = time();
 		$file = Yii::$app->basePath . '/uploads/' . $tempName;
@@ -759,7 +759,7 @@ class DefaultController extends Controller {
 			}
 			$filename = urldecode($filename);
 			rename($file, Yii::$app->basePath . '/uploads/' . $filename);
-			return Yii::$app->response->sendFile(Yii::$app->basePath . '/uploads/' . $filename);
+			return $text ? Yii::$app->basePath . '/uploads/' . $filename : Yii::$app->response->sendFile(Yii::$app->basePath . '/uploads/' . $filename);
 		} else {
 			unlink($file);
 		}
