@@ -418,7 +418,7 @@ class DefaultController extends Controller {
 					$filename = Str::explode(['filename="', '"'], $headers['content-disposition'][0]);
 				} else if (isset($headers['content-type'][0])) {
 					$contentType = $headers['content-type'][0];
-					if (mb_stripos($contentType, 'text/html' !== false) || mb_stripos($contentType, 'application/json' !== false) || mb_stripos($contentType, 'application/xml' !== false)) {
+					if ((mb_stripos($contentType, 'text/html') !== false) || (mb_stripos($contentType, 'application/json') !== false) || (mb_stripos($contentType, 'application/xml') !== false)) {
 						unlink($file);
 						return false;
 					}
