@@ -385,6 +385,7 @@ class DefaultController extends Controller {
 				}
 			}
 		} else if ($loadFile = $this->loadFile($url)) {
+			\Yii::debug($loadFile);
 			$result = Yii::$app->telegram->sendDocument([
 				'chat_id' => $idTelegram,
 				'document' => $loadFile
