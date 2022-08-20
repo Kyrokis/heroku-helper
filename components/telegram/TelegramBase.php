@@ -90,4 +90,11 @@ class TelegramBase extends \aki\telegram\Telegram
         //$response = new Response($body);
         return $body;
     }
+
+    public function sendDocument(array $params)
+    {
+        $body = $this->send("/sendDocument", $params);
+        //$response = new Response($body);
+        return $body;
+    }
 }
