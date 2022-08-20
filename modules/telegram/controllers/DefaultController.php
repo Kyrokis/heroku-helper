@@ -318,15 +318,7 @@ class DefaultController extends Controller {
 	}
 
 	private function getTorrent($url, $idTelegram) {
-		//nyaasi or .torrent
-		if (mb_stripos($url, '.torrent') !== false || (mb_stripos($url, $this->sites['nyaasi']) !== false && basename($url) == 'torrent')) {
-			$result = Yii::$app->telegram->sendDocument([
-				'chat_id' => $idTelegram,
-				'document' => $this->loadFile($url)
-			]);
-			Yii::debug(json_encode($result));
-		//soviet romantika or google drive
-		} else if (mb_stripos($url, $this->sites['googleDrive']) !== false || mb_stripos($url, $this->sites['romantica']) !== false) {
+		if (mb_stripos($url, $this->sites['googleDrive']) !== false || mb_stripos($url, $this->sites['romantica']) !== false) {
 			if (mb_stripos($url, $this->sites['romantica']) !== false) {
 				try {
 					$url = QueryList::get($url)->find('.animeTorrentDownload')->attrs('href')->all()[0];
@@ -390,6 +382,12 @@ class DefaultController extends Controller {
 					}
 				}
 			}
+		} else {
+			$result = Yii::$app->telegram->sendDocument([
+				'chat_id' => $idTelegram,
+				'document' => $this->loadFile($url)
+			]);
+			Yii::debug(json_encode($result));
 		}
 	}
 
