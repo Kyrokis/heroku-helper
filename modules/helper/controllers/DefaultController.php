@@ -36,7 +36,7 @@ class DefaultController extends Controller {
 	 */
 	public function beforeAction($action) {
 		$user = Yii::$app->user;
-		if ($action->id == 'helping') {
+		if ($action->id == 'helping' || $action->id == 'download') {
 			$this->enableCsrfValidation = FALSE;
 			$this->layout = FALSE;
 		} else if ($user->isGuest) {
@@ -742,11 +742,12 @@ class DefaultController extends Controller {
 		$responce = curl_exec($ch);
 		curl_close($ch);
 		if (file_exists($file) && filesize($file) !== 0) {
+			var_dump('<pre>', $headers); die;
 			if (isset($headers['content-disposition'][0])) {
 				$filename = Str::explode(['filename="', '"'], $headers['content-disposition'][0]);
 			} else if (isset($headers['content-type'][0])) {
 				$contentType = $headers['content-type'][0];
-				if (mb_stripos($contentType, 'text/html' !== false)) {
+				if (mb_stripos($contentType, 'text/html' !== false) || mb_stripos($contentType, 'application/json' !== false)) {
 					unlink($file);
 					return false;
 				}
