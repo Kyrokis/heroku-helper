@@ -394,26 +394,27 @@ class DefaultController extends Controller {
 	}
 
 	private function loadFile($url, $filename = null) {
-		if (!$filename) {
-			//$filename = urldecode(basename($url));
-			$explode = explode('/', urldecode($url));
-			$filename = end($explode);
-			$filename = ($filename == 'torrent') ? array_slice($explode, -2, 1)[0] : $filename;
-		}
-		if (mb_stripos($filename, '.torrent') === false && mb_stripos($filename, '.ass') === false) {
-			$filename .= '.torrent';
-		}
-		$file = Yii::$app->basePath . '/uploads/' . $filename;
+		$tempName = time();
+		$file = Yii::$app->basePath . '/uploads/' . $tempName;
 		$fp = fopen($file, 'w+');
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
+		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_FILE, $fp);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		curl_exec($ch);
 		curl_close($ch);
-		fclose($fp);
-		if (file_exists($file)) {
-			return $file;
+		if (file_exists($file) && filesize($file) !== 0) {
+			if (!$filename) {
+				$contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE); 
+				if (mb_stripos($contentType, 'name="') !== false) {
+					$filename = Str::explode(['name="', '";'], $contentType);
+				} else {
+					$filename = $tempName . '.' . explode('/', $contentType)[1];
+				}
+			}
+			rename($file, Yii::$app->basePath . '/uploads/' . $filename);
+			return Yii::$app->basePath . '/uploads/' . $filename;
+		} else {
+			unlink($file);
 		}
 		return false;
 	}
