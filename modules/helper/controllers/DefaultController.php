@@ -724,21 +724,35 @@ class DefaultController extends Controller {
 	}
 
 	public function actionDownload($url) {
+		$headers;
 		$tempName = time();
 		$file = Yii::$app->basePath . '/uploads/' . $tempName;
 		$fp = fopen($file, 'w+');
 		$ch = curl_init($url);
-		curl_setopt($ch, CURLOPT_FILE, $fp);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-		curl_exec($ch);
+		curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $header) use (&$headers) {
+				$len = strlen($header);
+				$header = explode(':', $header, 2);
+				if (count($header) < 2) // ignore invalid headers
+				  return $len;		
+				$headers[strtolower(trim($header[0]))][] = trim($header[1]);			
+				return $len;
+			});
+		curl_setopt($ch, CURLOPT_FILE, $fp);
+		$responce = curl_exec($ch);
 		curl_close($ch);
 		if (file_exists($file) && filesize($file) !== 0) {
-			var_dump(curl_getinfo($ch)); die;
-			if (preg_match('/Content-Disposition: .*filename=([^ ]+)/', $headers, $matches)) {
-				$filename = $matches[1];
-			} else {
-				$filename = $tempName . '.' . explode('/', $contentType)[1];
+			if (isset($headers['content-disposition'][0])) {
+				$filename = Str::explode(['filename="', '"'], $headers['content-disposition'][0]);
+			} else if (isset($headers['content-type'][0])) {
+				$contentType = $headers['content-type'][0];
+				if (mb_stripos($contentType, 'name="') !== false) {
+					$filename = Str::explode(['name="', '"'], $contentType);
+				} else {
+					$filename = $tempName . '.' . explode('/', $contentType)[1];
+				}
 			}
+			$filename = urldecode($filename);
 			rename($file, Yii::$app->basePath . '/uploads/' . $filename);
 			return Yii::$app->response->sendFile(Yii::$app->basePath . '/uploads/' . $filename);
 		} else {
