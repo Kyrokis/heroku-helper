@@ -395,8 +395,8 @@ class DefaultController extends Controller {
 	}
 
 	private function loadFile($url, $filename = null) {
-		if (mb_stripos($contentType, 'http://telegram-helper.herokuapp.com/helper/default/download?url=') !== false) {
-			$url = explode('http://telegram-helper.herokuapp.com/helper/default/download?url=', $url)[1];
+		if (mb_stripos($contentType, 'helper/default/download?url=') !== false) {
+			$url = explode('helper/default/download?url=', $url)[1];
 		}
 		$headers;
 		$tempName = time();
