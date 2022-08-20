@@ -403,9 +403,10 @@ class DefaultController extends Controller {
 		curl_close($ch);
 		if (file_exists($file) && filesize($file) !== 0) {
 			if (!$filename) {
-				$contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE); 
-				if (mb_stripos($contentType, 'name="') !== false) {
-					$filename = Str::explode(['name="', '";'], $contentType);
+				rewind($headerBuff);
+				$headers = stream_get_contents($headerBuff);				
+				if (preg_match('/Content-Disposition: .*filename=([^ ]+)/', $headers, $matches)) {
+					$filename = $matches[1]);
 				} else {
 					$filename = $tempName . '.' . explode('/', $contentType)[1];
 				}

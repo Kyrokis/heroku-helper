@@ -733,9 +733,9 @@ class DefaultController extends Controller {
 		curl_exec($ch);
 		curl_close($ch);
 		if (file_exists($file) && filesize($file) !== 0) {
-			$contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE); 
-			if (mb_stripos($contentType, 'name="') !== false) {
-				$filename = Str::explode(['name="', '";'], $contentType);
+			var_dump(curl_getinfo($ch)); die;
+			if (preg_match('/Content-Disposition: .*filename=([^ ]+)/', $headers, $matches)) {
+				$filename = $matches[1];
 			} else {
 				$filename = $tempName . '.' . explode('/', $contentType)[1];
 			}
