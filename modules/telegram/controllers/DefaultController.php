@@ -395,7 +395,7 @@ class DefaultController extends Controller {
 	}
 
 	private function loadFile($url, $filename = null) {
-		if (mb_stripos($contentType, 'helper/default/download?url=') !== false) {
+		if (mb_stripos($url, 'helper/default/download?url=') !== false) {
 			$url = explode('helper/default/download?url=', $url)[1];
 		}
 		$headers;
