@@ -741,6 +741,7 @@ class DefaultController extends Controller {
 		curl_setopt($ch, CURLOPT_FILE, $fp);
 		$responce = curl_exec($ch);
 		curl_close($ch);
+		\Yii::debug($headers);
 		if (file_exists($file) && filesize($file) !== 0) {
 			if (isset($headers['content-disposition'][0])) {
 				$filename = Str::explode(['filename="', '"'], $headers['content-disposition'][0]);
