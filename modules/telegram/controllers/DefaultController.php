@@ -395,9 +395,6 @@ class DefaultController extends Controller {
 	}
 
 	private function loadFile($url, $filename = null) {
-		if (mb_stripos($url, 'https://telegram-helper.herokuapp.com/helper/default/download') !== false) {
-			return $url . '&text=1';
-		}
 		$headers;
 		$tempName = time();
 		$file = Yii::$app->basePath . '/uploads/' . $tempName;

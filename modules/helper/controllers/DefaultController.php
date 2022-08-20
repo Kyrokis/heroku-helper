@@ -723,7 +723,7 @@ class DefaultController extends Controller {
 		return false;
 	}
 
-	public function actionDownload($url, $text = false) {
+	public function actionDownload($url, $text = true) {
 		$headers;
 		$tempName = time();
 		$file = Yii::$app->basePath . '/uploads/' . $tempName;
