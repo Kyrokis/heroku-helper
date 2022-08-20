@@ -366,27 +366,28 @@ class DefaultController extends Controller {
 				if ($files = $listFiles->getFiles()) {
 					foreach ($files as $file) {
 						$newName = $file->getName();
-						$document = $this->loadFile($file->getWebContentLink(), $newName);
-						Yii::debug('Попытка отправить файл: ' . $newName);
-						$result = Yii::$app->telegram->sendDocument([
-							'chat_id' => $idTelegram,
-							'document' => $document
-						]);
-						Yii::debug(json_encode($result));
-						if (!$result) {
-							Yii::debug('Что-то пошло не так и отправляю ссылку');
-							$result = Yii::$app->telegram->sendMessage([
+						if ($loadFile = $this->loadFile($file->getWebContentLink(), $newName)) {
+							Yii::debug('Попытка отправить файл: ' . $newName);
+							$result = Yii::$app->telegram->sendDocument([
 								'chat_id' => $idTelegram,
-								'text' => $file->getWebContentLink(),
-							]); 
+								'document' => $loadFile
+							]);
+							Yii::debug(json_encode($result));
+							if (!$result) {
+								Yii::debug('Что-то пошло не так и отправляю ссылку');
+								$result = Yii::$app->telegram->sendMessage([
+									'chat_id' => $idTelegram,
+									'text' => $file->getWebContentLink(),
+								]); 
+							}
 						}
 					}
 				}
 			}
-		} else {
+		} else if ($loadFile = $this->loadFile($url)) {
 			$result = Yii::$app->telegram->sendDocument([
 				'chat_id' => $idTelegram,
-				'document' => $this->loadFile($url)
+				'document' => $loadFile
 			]);
 			Yii::debug(json_encode($result));
 		}
