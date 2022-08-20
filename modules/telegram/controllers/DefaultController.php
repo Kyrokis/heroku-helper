@@ -432,7 +432,7 @@ class DefaultController extends Controller {
 			}
 			rename($file, Yii::$app->basePath . '/uploads/' . $filename);
 			return Yii::$app->basePath . '/uploads/' . $filename;
-		} else {
+		} else if (file_exists($file)) {
 			unlink($file);
 		}
 		return false;
