@@ -394,6 +394,9 @@ class DefaultController extends Controller {
 	}
 
 	private function loadFile($url, $filename = null) {
+		if (mb_stripos($url, 'https://telegram-helper.herokuapp.com/helper/default/download') !== false) {
+			return $url;
+		}
 		$headers;
 		$tempName = time();
 		$file = Yii::$app->basePath . '/uploads/' . $tempName;
@@ -412,6 +415,7 @@ class DefaultController extends Controller {
 		$responce = curl_exec($ch);
 		curl_close($ch);
 		\Yii::debug($headers);
+		\Yii::debug(file_exists($file));
 		if (file_exists($file) && filesize($file) !== 0) {
 			if (!$filename) {
 				if (isset($headers['content-disposition'][0])) {
