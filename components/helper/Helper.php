@@ -22,6 +22,7 @@ class Helper {
 		if (is_array($value)) {
 			$value = (object) $value;
 		}
+		\Yii::debug($value->link);
 		switch ($template->type) {
 			case 0:
 				return QueryList::getData($template, $value, $allFields);

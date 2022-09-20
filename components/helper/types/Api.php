@@ -57,7 +57,7 @@ class Api {
 			}
 			$check = Helper::checkClude($new['now'], $value->exclude, $value->include);
 			$offset++;
-			if ($offset > $value->offset + 9) {
+			if ($offset > $value->offset + 8) {
 				$check = true;
 				$new['now'] = $value->new;
 				$new['link_new'] = $value->link_new;
