@@ -88,6 +88,7 @@ class Api {
 			'manga' => $link[0],
 			'limit' => 1,
 			'offset' => $value->offset,
+			'includes' => ['manga'],
 			'order' => ['chapter' => 'desc'],
 		];
 		if (isset($link[1]) && $link[1]) {
