@@ -25,9 +25,9 @@ class Api {
 			case 'mangadex.org':
 				return self::mangadex($template, $value, $allFields);
 			case 'rss':
-				return self::proxyrarbg($template, $value, $allFields);
-			case 'proxyrarbg.org':
 				return self::rss($template, $value, $allFields);
+			case 'proxyrarbg.org':
+				return self::proxyrarbg($template, $value, $allFields);
 		}
 	}
 

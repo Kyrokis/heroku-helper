@@ -185,14 +185,16 @@ class DefaultController extends Controller {
 					($template->update_type == '1' && ($new['link_new'] != $value->link_new)) || 
 					($value->error == '1')) {
 					if (($model = \app\modules\helper\models\Items::findOne($value->id)) !== null) {
+						$error = '-1';
 						if ($new['now'] != $value->new) {
 							$model->new = $new['now'];
 							$model->link_new = $new['link_new'];
 							$model->dt_update = time();
+							$error = '0';
 						}
 						$model->error = '0';
 						$model->save();						
-						return ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $new['now'], 'link_new' => $new['link_new'], 'media' => $media, 'error' => $model->error];
+						return ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $new['now'], 'link_new' => $new['link_new'], 'media' => $media, 'error' => $error];
 					}
 				} else if (!$only_new && ($new['now'] != $value->now && $new['now'] == $value->new)) {
 					return ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $value->new, 'link_new' => $value->link_new, 'media' => $media, 'error' => $value->error];
