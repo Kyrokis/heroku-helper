@@ -30,6 +30,11 @@ class ItemsHistory extends ActiveRecord {
 	public $dt_end;
 
 	/**
+	 * @var string import
+	 */
+	public $import;
+
+	/**
 	 * @return string
 	 */
 	public static function tableName() {
@@ -42,7 +47,7 @@ class ItemsHistory extends ActiveRecord {
 	public function rules() {
 		return [
 			[['id', 'item_id', 'dt'], 'integer'],
-			[['now', 'link'], 'string'],
+			[['now', 'link', 'import'], 'string'],
 			[['item_id', 'dt'], 'required'],
 			[['dt_start', 'dt_end'], 'safe'],
 		];
@@ -68,6 +73,7 @@ class ItemsHistory extends ActiveRecord {
 			'dt' => 'Дата изменения',
 			'dt_start' => 'Начало периода',
 			'dt_end' => 'Конец периода',
+			'import' => 'Список для добавления',
 		];
 	}
 
@@ -106,6 +112,23 @@ class ItemsHistory extends ActiveRecord {
 				->andFilterWhere(['between', 'dt', strtotime($this->dt_start), strtotime($this->dt_end . '+1 day') - 1])
 				->orderBy('dt desc, id');
 		return new \yii\data\ActiveDataProvider(['query' => $query, 'pagination' => false, 'sort' => false]);
+	}
+
+	public function export() {
+		if ($this->item_id) {
+			$itemIds = $this->item_id;
+		} else {
+			//$user_id = Yii::$app->user->identity->admin ? null : Yii::$app->user->id;		
+			$user_id = Yii::$app->user->id;		
+			$itemIds = Yii\helpers\ArrayHelper::getColumn(Items::find()->select(['id'])->where(['del' => '0'])->andFilterWhere(['user_id' => $user_id])->all(), 'id');	
+		}
+		$query = self::find()->andFilterWhere([
+					'id' => $this->id,
+					'item_id' => $itemIds
+				])
+				->andFilterWhere(['between', 'dt', strtotime($this->dt_start), strtotime($this->dt_end . '+1 day') - 1])
+				->orderBy('dt desc, id');
+		return $query->all();
 	}
 
 	/**

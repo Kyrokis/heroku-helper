@@ -474,6 +474,52 @@ class DefaultController extends Controller {
 		return false;
 	}
 
+	public function actionExportHistory() {
+		$model = new ItemsHistory();
+		$model->load(\Yii::$app->request->get());
+		if (!$model->dt_start) {
+			$model->dt_start = date('d.m.Y', strtotime('-30 month'));
+		}
+		if (!$model->dt_end) {
+			$model->dt_end = date('d.m.Y', time());
+		}
+		$model->dt = $model->dt_start . ' - ' . $model->dt_end;
+		$out = "";
+		foreach ($model->export() as $item) {
+			$out .= "$item[item_id][=_=]$item[now][=_=]$item[link][=_=]$item[dt][=_=]\n";
+		}
+		var_dump('<pre>',$out);
+	}
+
+	public function actionImportHistory() {
+		$model = new ItemsHistory();
+		if ($model->load(\Yii::$app->request->post())) {
+			$items = explode("[=_=]\r\n", $model->import);
+			$result = [];
+			foreach ($items as $item) {
+				$item = explode('[=_=]', $item);
+				$newItem = new ItemsHistory();
+				//var_dump($item); die;
+				$newItem->item_id = $item[0];
+				$newItem->now = $item[1];
+				$newItem->link = $item[2];
+				$newItem->dt = $item[3];
+				if ($newItem->validate() && $newItem->save()) {
+					$result[] = $item[0] . ' добавлен';
+				} else {
+					$text = $item[0] . "\n";
+					foreach ($newItem->getErrors() as $error) {
+						$text .= $error[0] . "\n";
+					}
+					$result[] = $text;
+				}
+			}
+			var_dump('<pre>', $result); die;
+			return $this->redirect(['index']);
+		} 
+		return $this->render('mass-create', ['model' => $model]);
+	}
+
 	public function actionTest() {
 	}
 
