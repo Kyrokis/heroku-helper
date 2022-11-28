@@ -77,6 +77,12 @@ class TelegramBase extends \aki\telegram\Telegram
 		return ['form_params' => $params];
 	}
 
+	public function sendMessage(array $params)
+    {
+        $body = $this->send("/sendMessage", $params);
+        return $body;
+    }
+
 	public function editMessageReplyMarkup(array $params = [])
 	{
 		$body = $this->send("/editMessageReplyMarkup", $params);
@@ -95,6 +101,12 @@ class TelegramBase extends \aki\telegram\Telegram
     {
         $body = $this->send("/sendDocument", $params);
         //$response = new Response($body);
+        return $body;
+    }
+
+    public function getWebhookInfo()
+    {
+        $body = $this->send("/getWebhookInfo");
         return $body;
     }
 }

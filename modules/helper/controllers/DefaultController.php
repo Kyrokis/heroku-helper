@@ -335,7 +335,7 @@ class DefaultController extends Controller {
 	 * @param integer $id
 	 * @return mixed
 	 */
-	public function actionHistoryDelete($id = null, $item_id = null) {
+	public function actionDeleteHistory($id = null, $item_id = null) {
 		if ($id) {
 			$model = ItemsHistory::findOne($id);
 			if (!$model) {
@@ -353,7 +353,13 @@ class DefaultController extends Controller {
 				throw new \yii\web\ForbiddenHttpException('У Вас нет прав на это действие');
 			}
 			ItemsHistory::deleteAll(['item_id' => $item_id]);
-		}
+		} /*else if ($user = Yii::$app->user) {
+			if (!$user->identity->admin) {
+				throw new \yii\web\ForbiddenHttpException('У Вас нет прав на это действие');
+			}
+			$itemIds = ArrayHelper::getColumn(Items::find()->andFilterWhere(['user_id' => $user->id, 'del' => '0'])->all(), 'id');
+			ItemsHistory::deleteAll(['item_id' => $itemIds]);
+		}*/
 
 		return $this->redirect(Yii::$app->request->referrer ? : ['history']);
 	}

@@ -103,8 +103,20 @@ class DefaultController extends Controller {
 	 * Activate webhook on url
 	 * @return json
 	 */
+	public function actionGetWebhookInfo() {
+		$result = Yii::$app->telegram->getWebhookInfo(); 
+		return var_dump('<pre>', $result);
+	}
+
+
+	/**
+	 * Get webhook info
+	 * @return json
+	 */
 	public function actionSetWebhook($url = '') {
+		Yii::$app->telegram->deleteWebhook(); 
 		$url = $url != '' ? $url : \Yii::$app->params['webhookPage'];
+		$url = 'https://7793-81-90-219-254.eu.ngrok.io/helper/telegram/default/webhook-page';
 		$result = Yii::$app->telegram->setWebhook(['url' => $url]); 
 		return json_encode($result);
 	}
