@@ -31,7 +31,8 @@
 		"google/apiclient":"^2.0",
 		"vkcom/vk-php-sdk": "dev-master",
 		"marekpetras/yii2-calendarview-widget": "^1.0",
-		"jaeger/querylist": "*"
+		"jaeger/querylist": "*",
+		"yiisoft/yii2-queue": "^2.3"
 	},
 	"require-dev": {
 		"yiisoft/yii2-gii": "~2.1.0",

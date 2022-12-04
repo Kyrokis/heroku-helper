@@ -165,6 +165,27 @@ class DefaultController extends Controller {
 			$user->dt_helping = time();
 			$user->save(FALSE, ['dt_helping']);	
 		}
+		//$Thread = new Thread();
+		$jobIds = [];
+		foreach ($items as $value) {
+			$jobIds[] = Yii::$app->queue->push(new \app\components\jobs\Helping(['value' => $value, 'only_new' => $only_new]));
+		}
+		return var_dump('Нужно подождать', $jobIds, Yii::$app->queue->isDone($jobIds[0]));
+	}	
+
+
+	/**
+	 * Helping items
+	 * @return json
+	 */	
+	public function actionHelpingClassic($id = null, $user_id = null, $only_new = false) {
+		$items = Items::find()->andFilterWhere(['id' => $id, 'user_id' => $user_id, 'del' => '0'])->all();
+		$only_new = ($only_new == '0' || $only_new == 'false' || !$only_new) ? false : true;
+		if ($user_id) {
+			$user = User::findOne($user_id);
+			$user->dt_helping = time();
+			$user->save(FALSE, ['dt_helping']);	
+		}
 		$Thread = new Thread();
 		foreach ($items as $value) {
 			$Thread->Create(function() use($value, $only_new) {

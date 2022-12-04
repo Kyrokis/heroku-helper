@@ -8,7 +8,7 @@ $config = [
 	'basePath' => dirname(__DIR__),
 	'language' => 'ru-RU',
 	'timeZone' => 'Europe/Moscow',
-	'bootstrap' => ['debug', 'log'],
+	'bootstrap' => ['debug', 'log', 'queue'],
 	'aliases' => [
 		'@bower' => '@vendor/bower-asset',
 		'@npm'   => '@vendor/npm-asset',
@@ -52,6 +52,14 @@ $config = [
 			'botToken' => getenv("telegramBotToken"),
 		],
 		'db' => $db,
+		'queue' => [
+			'class' => \yii\queue\db\Queue::class,
+            'db' => 'db', // DB connection component or its config 
+            'tableName' => '{{%queue}}', // Table name
+            'channel' => 'default', // Queue channel key
+            'mutex' => \yii\mutex\PgsqlMutex::class, // Mutex used to sync queries
+			'as log' => \yii\queue\LogBehavior::class,
+		],
 	],
 	'modules' => [
 		'helper' => 'app\modules\helper\HelperModule',
@@ -62,6 +70,9 @@ $config = [
 		'gridview' => '\kartik\grid\Module',
 		'debug' => [
 			'class' => 'yii\debug\Module',
+			'panels' => [
+				'queue' => \yii\queue\debug\Panel::class,
+			],
 			'allowedIPs' => ['*'],
 		],
 	],

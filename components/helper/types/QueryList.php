@@ -24,7 +24,7 @@ class QueryList {
 		if ($allFields) {
 			$new = $query->rules([ 
 								'title' => $template->title, 
-								'link_img' => $template->link_img
+								//'link_img' => $template->link_img
 							])
 							->query()->getData()->all();			
 		}

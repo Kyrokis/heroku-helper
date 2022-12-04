@@ -34,16 +34,18 @@ class DefaultController extends Controller {
 	/**
 	 * @inheritdoc
 	 */
-	public function beforeAction($action) {		
-		$user = Yii::$app->user;
-		if (($action->id != 'update' && $action->id != 'webhook-page') && !$user->identity->admin) {
-			if ($user->isGuest) {
-				$this->redirect($user->loginUrl);
-			} else {
-				$this->goHome();
+	public function beforeAction($action) {	
+		if (isset(Yii::$app->user)) {
+			$user = Yii::$app->user;
+			if (($action->id != 'update' && $action->id != 'webhook-page' && $action->id != 'get-torrent') && !$user->identity->admin) {
+				if ($user->isGuest) {
+					$this->redirect($user->loginUrl);
+				} else {
+					$this->goHome();
+				}
 			}
 		}
-		if ($action->id == 'update' || $action->id == 'webhook-page') {
+		if ($action->id == 'update' || $action->id == 'webhook-page' || $action->id == 'get-torrent') {
 			$this->enableCsrfValidation = FALSE;
 			$this->layout = FALSE;
 		}
@@ -77,7 +79,8 @@ class DefaultController extends Controller {
 					'chat_id' => $chat_id,
 					'text' => $text,
 				]); 
-		return $result;
+
+		return json_encode($result);
 	}
 
 	/**
@@ -95,7 +98,7 @@ class DefaultController extends Controller {
 			'text' => json_encode($updates),
 		]); 
 		Yii::$app->telegram->setWebhook(['url' => \Yii::$app->params['webhookPage']]); 
-		return $result;
+		return json_encode($result);
 	}
 
 
@@ -105,7 +108,7 @@ class DefaultController extends Controller {
 	 */
 	public function actionGetWebhookInfo() {
 		$result = Yii::$app->telegram->getWebhookInfo(); 
-		return var_dump('<pre>', $result);
+		return json_encode($result);
 	}
 
 
@@ -116,7 +119,6 @@ class DefaultController extends Controller {
 	public function actionSetWebhook($url = '') {
 		Yii::$app->telegram->deleteWebhook(); 
 		$url = $url != '' ? $url : \Yii::$app->params['webhookPage'];
-		$url = 'https://7793-81-90-219-254.eu.ngrok.io/helper/telegram/default/webhook-page';
 		$result = Yii::$app->telegram->setWebhook(['url' => $url]); 
 		return json_encode($result);
 	}
@@ -204,6 +206,10 @@ class DefaultController extends Controller {
 		return false;
 	}
 
+	public function actionGetTorrent($url, $idTelegram) {
+		return $this->getTorrent($url, $idTelegram);
+	}
+
 	public function actionTest() {	
 	}
 
@@ -226,7 +232,7 @@ class DefaultController extends Controller {
 				'chat_id' => $idTelegram,
 				'text' => $idTelegram,
 		]);
-		return $result;
+		return json_encode($result);
 	}
 
 	private function changeMode($idTelegram) {
@@ -246,7 +252,7 @@ class DefaultController extends Controller {
 			]);
 		}
 		Yii::debug($result);
-		return $result;
+		return json_encode($result);
 	}
 
 	private function showKeyboard($idTelegram) {
@@ -266,6 +272,30 @@ class DefaultController extends Controller {
 	}
 
 	private function update($idTelegram = null, $userId = null, $only_new = false) {
+		if ($idTelegram) {
+			$user = User::find()->where(['id_telegram' => $idTelegram, 'del' => '0'])->one();
+			$userId = $user->id;
+		} else if ($userId) {
+			$user = User::find()->where(['id' => $userId, 'del' => '0'])->one();
+			$idTelegram = $user->id_telegram;
+		} else {
+			return false;
+		}
+		$only_new = ($only_new == '0' || $only_new == 'false' || !$only_new) ? false : true;
+		if ($userId) {
+			$user = User::findOne($userId);
+			$user->dt_helping = time();
+			$user->save(FALSE, ['dt_helping']);	
+		}
+		if ($items = Items::find()->andFilterWhere(['user_id' => $userId, 'del' => '0'])->all()) {
+			foreach ($items as $value) {
+				$jobIds[] = Yii::$app->queue->push(new \app\components\jobs\Helping(['value' => $value, 'only_new' => $only_new, 'telegram' => true, 'idTelegram' => $idTelegram]));
+			}
+		}
+		return var_dump('Нужно подождать', $jobIds, Yii::$app->queue->isDone($jobIds[0]));
+	}
+
+	private function updateClassic($idTelegram = null, $userId = null, $only_new = false) {
 		if ($idTelegram) {
 			$user = User::find()->where(['id_telegram' => $idTelegram, 'del' => '0'])->one();
 			$userId = $user->id;

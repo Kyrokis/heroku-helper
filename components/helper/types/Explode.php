@@ -26,11 +26,13 @@ class Explode {
 		if ($allFields) {
 			$new = [
 				'title' => Str::explode($template->title, $content),
-				'link_img' => Str::explode($template->link_img, $content),
+				//'link_img' => Str::explode($template->link_img, $content),
 			];
 		}
 		do {
 			$new['now'] = Str::explode($template->new, $content, $offset);
+			//var_dump(json_decode($new['now'])); die;
+			//var_dump(($new['now'])); die;
 			$new['link_new'] = Str::explode($template->link_new, $content, $offset);
 			if ($new['now'] == $value->now && $offset != $value->offset) {
 				$check = true;

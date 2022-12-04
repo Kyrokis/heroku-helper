@@ -28,6 +28,8 @@ class Api {
 				return self::rss($template, $value, $allFields);
 			case 'proxyrarbg.org':
 				return self::proxyrarbg($template, $value, $allFields);
+			case 'mangalib.me':
+				return self::mangalib($template, $value, $allFields);
 		}
 	}
 
@@ -145,6 +147,14 @@ class Api {
 			$new['title'] = $content['title'];
 			$new['link_img'] = '';
 		}
+		return $new;
+	}
+
+	public static function mangalib($template, $value, $allFields) {
+		$new = Explode::getData($template, $value, $allFields);
+		$new['now'] = json_decode($new['now']);
+		$link_new = explode('","chapter_volume":', $new['link_new']);
+		$new['link_new'] = $value->link . "/v$link_new[1]/c$link_new[0]";
 		return $new;
 	}
 }

@@ -1,6 +1,8 @@
 <?php
 namespace app\components\telegram;
 
+use aki\telegram\base\Response;
+
 /**
  * @author Akbar Joudi <akbar.joody@gmail.com>
  */
@@ -8,9 +10,9 @@ class TelegramBase extends \aki\telegram\Telegram
 {
 
 	 /**
-     * @var Input
-     */
-    private $_input;
+	 * @var Input
+	 */
+	//private $_input;
 
 	 /**
 	 * @return \Input
@@ -18,7 +20,7 @@ class TelegramBase extends \aki\telegram\Telegram
 	/**
 	 * @return Input
 	 */
-	protected function getInput(): ?Input
+	/*protected function getInput(): ?Input
 	{
 		if (empty($this->_input)) {
 			$input = file_get_contents('php://input');
@@ -36,13 +38,13 @@ class TelegramBase extends \aki\telegram\Telegram
 		}
 
 		return $this->_input;
-	}
+	}*/
 
 	/**
 	 * initializeParams
 	 * @param Array $params
 	 */
-	public function initializeParams($params)
+	public function initializeParams($params): array
 	{
 		$is_resource = false;
 		$multipart    = [];
@@ -77,36 +79,47 @@ class TelegramBase extends \aki\telegram\Telegram
 		return ['form_params' => $params];
 	}
 
-	public function sendMessage(array $params)
-    {
-        $body = $this->send("/sendMessage", $params);
-        return $body;
-    }
+	/*public function sendMessage(array $params)
+	{
+		$body = $this->send("/sendMessage", $params);
+		return $body;
+	}
 
 	public function editMessageReplyMarkup(array $params = [])
 	{
 		$body = $this->send("/editMessageReplyMarkup", $params);
 		//$response = new Response($body);
-        return $body;
+		return $body;
 	}
 
 	public function deleteMessage(array $params = [])
-    {
-        $body = $this->send("/deleteMessage", $params);
-        //$response = new Response($body);
-        return $body;
-    }
+	{
+		$body = $this->send("/deleteMessage", $params);
+		//$response = new Response($body);
+		return $body;
+	}
 
-    public function sendDocument(array $params)
-    {
-        $body = $this->send("/sendDocument", $params);
-        //$response = new Response($body);
-        return $body;
-    }
+	public function sendDocument(array $params)
+	{
+		$body = $this->send("/sendDocument", $params);
+		//$response = new Response($body);
+		return $body;
+	}*/
 
-    public function getWebhookInfo()
-    {
-        $body = $this->send("/getWebhookInfo");
-        return $body;
-    }
+	public function getWebhookInfo()
+	{
+		$body = $this->send('/getWebhookInfo', []);
+		return $body;
+	}
+
+	public function getMe(): Response
+	{
+		$body = $this->send('/getMe', []);
+		return new Response([
+			'ok' => $body['ok'],
+			'result' => [
+				'user' => $body['result']
+			]
+		]);
+	}
 }
