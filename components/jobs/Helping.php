@@ -21,13 +21,24 @@ class Helping extends BaseObject implements \yii\queue\JobInterface {
 		$only_new = $this->only_new;
 		$telegram = $this->telegram;
 		$idTelegram = $this->idTelegram;
+		$prevValue = $value->prevValue;
 
 		// Get item info
 		var_dump($value->title . ' - ' . $value->link);
 		$media = [];
 		$template = Template::findOne($value->id_template);
-		$new = Helper::getData($template, $value);
-		if (isset($new) && $new['link_new'] == '' && $new['now'] == '') {
+		$helpingError = false;
+		try {
+			$new = Helper::getData($template, $value);
+			if (!is_array($new)) {
+				$helpingError = true;
+				var_dump('Error error error');
+			}
+		} catch (\Exception $e) {
+			$helpingError = true;
+			var_dump('Error error error');
+		}
+		if ($helpingError || (isset($new) && $new['link_new'] == '' && $new['now'] == '')) {
 			if (($model = Items::findOne($value->id)) !== null) {
 				$model->error = '1';
 				//$model->dt_update = time();
@@ -38,9 +49,10 @@ class Helping extends BaseObject implements \yii\queue\JobInterface {
 		$new['now'] = ($new['now'] != '') ? $new['now'] : $new['link_new'];
 		$media = isset($new['media']) ? $new['media'] : '';
 		$item = false;
-		if (($template->update_type == '0' && (($new['now'] != $value->now && $new['now'] != $value->new) || ($new['now'] == $value->now && $new['now'] != $value->new))) || 
-			($template->update_type == '1' && ($new['link_new'] != $value->link_new)) || 
-			($value->error == '1')) {
+		if ((($template->update_type == '0' && (($new['now'] != $value->now && $new['now'] != $value->new) || ($new['now'] == $value->now && $new['now'] != $value->new))) || 
+					($template->update_type == '1' && ($new['now'] != $value->link_new)) || 
+					($value->error == '1')) &&
+			(isset($prevValue) && ($prevValue->now != $new['now'] && $prevValue->link != $new['link_new']))) {
 			if (($model = Items::findOne($value->id)) !== null) {
 				$error = '-1';
 				if ($new['now'] != $value->new) {

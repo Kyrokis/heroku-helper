@@ -50,8 +50,16 @@ class Api {
 		}
 		$offset = 0;
 		do {
-			$item = isset($post['items'][$offset]['copy_history']) ? $post['items'][$offset]['copy_history'][0] : $post['items'][$offset];
+			$item = $post['items'][$offset];
 			$new['now'] = $item['text'];
+			if (isset($post['items'][$offset]['copy_history'])) {
+				$repost = $post['items'][$offset]['copy_history'][0];
+				if ($new['now'] == '') {
+					$new['now'] .= $repost['text'];
+				} else {
+					$new['now'] .= "\n" . $repost['text'];
+				}
+			}
 			$new['link_new'] = '/wall' . $value->link . '_' . $item['id'];
 			if ($new['now'] == $value->now && $offset != $value->offset) {
 				$check = true;

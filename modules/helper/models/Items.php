@@ -107,6 +107,14 @@ class Items extends ActiveRecord {
 	}
 
 	/**
+	 * ItemsHistory
+	 * @return \app\models\ItemsHistory
+	 */
+	public function getPrevPrevValue() {
+		return $this->hasOne(ItemsHistory::className(), ['item_id' => 'id'])->offset(2)->orderBy('dt desc');
+	}
+
+	/**
 	 * @inheritdoc
 	 */
 	public function attributeLabels() {
@@ -156,6 +164,17 @@ class Items extends ActiveRecord {
 			ItemsHistory::add($this->id, $this->new, Template::getFullLink($this->link_new, $this->id_template));
 		}
 		return parent::afterSave($insert, $changedAttributes);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function afterFind() {
+		if ($this->link) {
+			$this->link = str_replace('nyaa.si', 'ny.iss.one', $this->link);
+		}
+
+		parent::afterFind();
 	}
 
 	/**

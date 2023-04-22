@@ -17,7 +17,12 @@ class QueryList {
 	 * @return string
 	 */
 	public static function getData($template, $value, $allFields) {
-		$html = \QL\QueryList::get($value->link, null, ['timeout' => 5])->getHtml();
+		$link = $value->link;
+		if ($template->id == 8) {
+			//$link = str_replace('.si', '.ink', $value->link);
+			//return false;
+		}
+		$html = \QL\QueryList::get($link, null, ['timeout' => 10])->getHtml();
 		$query = \QL\QueryList::html($html);
 		$check = false;
 		$offset = $value->offset;
