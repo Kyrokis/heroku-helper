@@ -67,7 +67,7 @@ class DefaultController extends Controller {
 		$model = new ItemsHistory();
 		$model->load(\Yii::$app->request->get());
 		if (!$model->dt_start) {
-			$model->dt_start = date('d.m.Y', strtotime('-1 month'));
+			$model->dt_start = date('d.m.Y', strtotime('-1 day'));
 		}
 		if (!$model->dt_end) {
 			$model->dt_end = date('d.m.Y', time());

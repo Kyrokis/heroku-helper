@@ -49,13 +49,15 @@ class Helping extends BaseObject implements \yii\queue\JobInterface {
 		$new['now'] = ($new['now'] != '') ? $new['now'] : $new['link_new'];
 		$media = isset($new['media']) ? $new['media'] : '';
 		$item = false;
+		//var_dump($new['now']);
 		if ((($template->update_type == '0' && (($new['now'] != $value->now && $new['now'] != $value->new) || ($new['now'] == $value->now && $new['now'] != $value->new))) || 
-					($template->update_type == '1' && ($new['now'] != $value->link_new)) || 
-					($value->error == '1')) &&
-			(isset($prevValue) && ($prevValue->now != $new['now'] && $prevValue->link != $new['link_new']))) {
+			($template->update_type == '1' && ($new['link_new'] != $value->link_new)) || 
+			($value->error == '1')) 
+			&& ((isset($prevValue) && ($prevValue->now != $new['now'] && $prevValue->link != $new['link_new'])) || !isset($prevValue) || $value->error == '1')
+		) {
 			if (($model = Items::findOne($value->id)) !== null) {
 				$error = '-1';
-				if ($new['now'] != $value->new) {
+				if (($template->update_type == '0' && $new['now'] != $value->new) || ($template->update_type == '1' && $new['link_new'] != $value->link_new)) {
 					$model->new = $new['now'];
 					$model->link_new = $new['link_new'];
 					$model->dt_update = time();

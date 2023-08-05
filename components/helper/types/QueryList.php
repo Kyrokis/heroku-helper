@@ -20,6 +20,8 @@ class QueryList {
 		$link = $value->link;
 		if ($template->id == 8) {
 			//$link = str_replace('.si', '.ink', $value->link);
+			//$link = $value->link . '&fresh_load';
+			$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($value->link. '&fresh_load_' . time());
 			//return false;
 		}
 		$html = \QL\QueryList::get($link, null, ['timeout' => 10])->getHtml();

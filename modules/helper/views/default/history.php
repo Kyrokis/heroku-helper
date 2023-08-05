@@ -27,7 +27,7 @@ echo GridView::widget([
 								'data-pjax' => '0',
 								'target' => '_blank'
 							]) .
-						Html::a('<i class="glyphicon glyphicon-trash"></i>', ['/helper/default/history-delete', 'item_id' => (is_array($model->item_id) ? $model->item_id[0] : $model->item_id)], [
+						Html::a('<i class="glyphicon glyphicon-trash"></i>', ['/helper/default/delete-history', 'item_id' => (is_array($model->item_id) ? $model->item_id[0] : $model->item_id)], [
 								'class' => 'btn btn-default' . (((is_array($model->item_id) && count($model->item_id) > 1) || !isset($model->item_id)) ? ' hidden' : ''),
 								'title' => 'Удалить всю историю',
 								'data-confirm' => 'Вы уверены, что хотите удалить всю историю этой записи?',

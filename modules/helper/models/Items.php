@@ -171,7 +171,7 @@ class Items extends ActiveRecord {
 	 */
 	public function afterFind() {
 		if ($this->link) {
-			$this->link = str_replace('nyaa.si', 'ny.iss.one', $this->link);
+			//$this->link = str_replace('nyaa.si', 'https://freeproxy.io/o.php?b=4&u=' . urlencode($this->link), $this->link);
 		}
 
 		parent::afterFind();

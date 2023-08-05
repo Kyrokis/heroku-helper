@@ -52,7 +52,7 @@ class DefaultController extends Controller {
 	public function actionCreate() {
 		$model = new Template();
 		if ($model->load(\Yii::$app->request->post()) && $model->save()) {
-			return $this->redirect(['index']);
+			//return $this->redirect(['index']);
 		} else if (!$model->type) {
 			$model->type = 0;
 		}
@@ -72,7 +72,7 @@ class DefaultController extends Controller {
 			throw new \yii\web\ForbiddenHttpException('У Вас нет прав на это действие');
 		}
 		if ($model->load(\Yii::$app->request->post()) && $model->save()) {
-			return $this->redirect(['index']);
+			//return $this->redirect(['index']);
 		}
 
 		return $this->render('update', ['model' => $model]);
