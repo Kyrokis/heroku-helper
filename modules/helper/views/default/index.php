@@ -101,9 +101,10 @@ echo GridView::widget([
 					$link = explode(',', $data->link);
 					$link = end($link);
 				} else if ($data->template->id == 8) {
-					$link = str_replace('.si', '.ink', $data->link);
+					//$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($data->link . '&fresh_load_' . time());
 				} else if ($data->template->name == 'SubsPlease') {
-					$link = 'https://nyaa.ink/user/subsplease?f=0&c=0_0&q=' . urlencode($data->link);
+					//$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode('https://nyaa.si/user/subsplease?f=0&c=0_0&q=' . $data->link . '&fresh_load_' . time());
+					$link = 'https://nyaa.land/user/subsplease?f=0&c=0_0&q=' . urlencode($data->link);
 				}
 				return Html::a($data->title, $link, ['target' => '_blank']) . ' ' . Html::a('<span class="glyphicon glyphicon-time"></span>', ['/helper/default/history', 'ItemsHistory[item_id][]' => $data->id], ['style' => 'color: #6c757d!important;', 'target' => '_blank', 'data-pjax' => '0']);
 			},
