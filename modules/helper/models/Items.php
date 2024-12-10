@@ -110,6 +110,29 @@ class Items extends ActiveRecord {
 	 * ItemsHistory
 	 * @return \app\models\ItemsHistory
 	 */
+	public function getLastChecked() {
+		return $this->hasOne(ItemsHistory::className(), ['item_id' => 'id'])->andFilterWhere(['checked' => '1'])->orderBy('dt desc');
+	}
+
+	/**
+	 * ItemsHistory
+	 * @return \app\models\ItemsHistory
+	 */
+	public function getFirstUnchecked() {
+		return $this->hasOne(ItemsHistory::className(), ['item_id' => 'id'])->andFilterWhere(['checked' => '0'])->orderBy('dt asc');
+	}
+/**
+	 * ItemsHistory
+	 * @return \app\models\ItemsHistory
+	 */
+	public function getLastUnchecked() {
+		return $this->hasOne(ItemsHistory::className(), ['item_id' => 'id'])->andFilterWhere(['checked' => '0'])->orderBy('dt desc');
+	}
+
+	/**
+	 * ItemsHistory
+	 * @return \app\models\ItemsHistory
+	 */
 	public function getPrevPrevValue() {
 		return $this->hasOne(ItemsHistory::className(), ['item_id' => 'id'])->offset(2)->orderBy('dt desc');
 	}

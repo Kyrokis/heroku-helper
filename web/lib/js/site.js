@@ -88,6 +88,29 @@ var site = {};
 		return false;
 	};
 
+	/**
+	 * Check selected title
+	 */
+	site.checkHistory = function () {
+		var item = $(this);
+		var id = item.data('id');
+		var value = item[0].checked;
+		var type = item.data('type');
+		console.log(id, value);
+		$.get('/helper/default/check-history', {'id': id, 'value': value, 'type': type}).done(function (data) {
+			if (data) {
+				if (type != '') {
+					item.next().remove();
+					item.parent().html(data);					
+				}
+				console.log('Все прошло так');
+			} else {
+				console.log('Что-то пошло не так');
+			}
+		});
+		return false;
+	};
+
 	site.selectAll = function() {
 		var include = $('#items-include').find('option');
 		include.each(function() {
@@ -128,6 +151,7 @@ $(function () {
 	$('body').on('click', '.send-msg', site.sendMessage);
 	$('body').on('click', '.helping', site.helping);
 	$('body').on('click', '.check', site.check);
+	$('body').on('change', '.checkHistory', site.checkHistory);
 	$('body').on('click', '.copy', site.copy);
 	$('body').on('click', '.del-word', site.delWord);
 	$('body').on('click', '.add-word', site.addWord);

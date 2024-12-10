@@ -18,10 +18,10 @@ class QueryList {
 	 */
 	public static function getData($template, $value, $allFields) {
 		$link = $value->link;
-		if ($template->id == 8) {
-			//$link = str_replace('.si', '.ink', $value->link);
-			//$link = $value->link . '&fresh_load';
-			//$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($value->link. '&fresh_load_' . time());
+		if ($template->id == 8 || $template->id == 42 || $template->id == 40) {
+			//$link = str_replace('nyaa.si', 'nyaa.land', $value->link);
+			//$link = $value->link . '&fresh_load_' . time();
+			$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($link. '&fresh_load_' . time());
 			//return false;
 		}
 		$html = \QL\QueryList::get($link, null, ['timeout' => 10])->getHtml();

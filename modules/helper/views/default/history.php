@@ -88,6 +88,20 @@ echo GridView::widget([
 			'filter' => false,
 		],
 		[
+			'attribute' => 'checked',
+			'format' => 'raw',
+			'width' => '36px',
+			
+			'value' => function ($data, $id) {
+				return Html::checkbox('checked[]', $data->checked, ['data-id' => $id, 'data-type' => '', 'class' => 'checkHistory']);
+			},
+			'filterType' => GridView::FILTER_SELECT2,
+			'filter' => ['1' => 'Да', '0' => 'Нет'], 
+			'filterWidgetOptions' => [
+				'pluginOptions' => ['placeholder' => '',  'allowClear' => true],
+			],
+		],
+		[
 			'attribute' => 'dt',
 			'format' => 'raw',
 			'value' => function ($data) {
@@ -109,7 +123,7 @@ echo GridView::widget([
 						'Сегодня' => ["moment().startOf('day')", "moment()"],
 						'Вчера' => ["moment().startOf('day').subtract(1,'days')", "moment().endOf('day').subtract(1,'days')"],
 						'Последние 7 дней' => ["moment().endOf('day').subtract(7,'days')", "moment().startOf('day')"],
-						'Этот месяц' => ["moment().startOf('month')", "moment().endOf('month')"],
+						'Последний месяц' => ["moment().endOf('day').subtract(30,'days')", "moment().startOf('day')"],
 						'Последние 3 месяца' => ["moment().endOf('month').subtract(3,'month')", "moment().endOf('month')"],
 					]
 				],

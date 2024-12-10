@@ -15,7 +15,8 @@ use app\components\Str;
 use app\components\youtube\Youtube;
 use yii\helpers\ArrayHelper;
 use app\components\helper\Helper;
-
+use yii\helpers\Html;
+use yii\helpers\StringHelper;
 
 /**
  * Controller for Helper module
@@ -67,10 +68,13 @@ class DefaultController extends Controller {
 		$model = new ItemsHistory();
 		$model->load(\Yii::$app->request->get());
 		if (!$model->dt_start) {
-			$model->dt_start = date('d.m.Y', strtotime('-1 day'));
+			$model->dt_start = date('d.m.Y', strtotime('-90 day'));
 		}
 		if (!$model->dt_end) {
 			$model->dt_end = date('d.m.Y', time());
+		}
+		if (!$model->checked) {
+			$model->checked = '0';
 		}
 		$model->dt = $model->dt_start . ' - ' . $model->dt_end;
 		return $this->render('history', ['model' => $model]);
@@ -150,7 +154,41 @@ class DefaultController extends Controller {
 			throw new \yii\web\ForbiddenHttpException('У Вас нет прав на это действие');
 		}
 		$model->now = $model->new;
-		return $model->save();
+		if ($model->save()) {
+			ItemsHistory::updateAll(['checked' => '1'], ['item_id' => $model->id]);
+		}
+		return true;
+	}
+
+	/**
+	 * Check selected item
+	 * @return bool
+	 */
+	public function actionCheckHistory($id, $value, $type = '') {
+		$model = ItemsHistory::findOne($id);
+		$user = Yii::$app->user;
+		if (!$user->identity->admin && $user->id != $model->item->user_id) {
+			throw new \yii\web\ForbiddenHttpException('У Вас нет прав на это действие');
+		}
+		$model->checked = $value == 'true' ? '1' : '0';
+		if ($model->save() && $type != '') {
+			$newItem = $type == 'last' ? $model->item->lastUnchecked : $model->item->firstUnchecked;
+			$new = $newItem->now;
+			$link = $newItem->link;
+			$checkbox = Html::checkbox('checked[]', $newItem->checked, ['data-id' => $newItem->id, 'data-type' => $type, 'class' => 'checkHistory']) . ' ';
+			$text = nl2br(StringHelper::truncate($new, 100, '...', null, true));
+			$tooltip = Html::tag('span', $text, [
+				'title' => $new,
+				'data-toggle' => 'tooltip',
+			]);
+			if ($link) {
+				$out = Html::a($tooltip, $link, ['target' => '_blank', 'data-pjax' => '0']);
+			} else {
+				$out = $tooltip;
+			}
+			return $checkbox . $out;
+		}
+		return true;
 	}
 
 	/**
@@ -303,6 +341,18 @@ class DefaultController extends Controller {
 			return $this->redirect(['index']);
 		}
 		return $this->render('mass-update', ['model' => $model]);
+	}
+
+	public function actionActualChecks($user_id = 1) {
+		$items = new Items();
+		$items->setScenario(Items::SCENARIO_SEARCH);
+		$items->user_id = Yii::$app->user->id;
+		$result = $items->searchQuery()->all();
+		foreach ($result as $item) {
+			if ($historyItem = ItemsHistory::find()->andFilterWhere(['now' => $item->now])->one()) {
+				ItemsHistory::updateAll(['checked' => '1'], ['AND', ['item_id' => $item->id], ['<=', 'id', $historyItem->id]]);
+			}
+		}
 	}
 
 	/**
@@ -547,7 +597,68 @@ class DefaultController extends Controller {
 		return $this->render('mass-create', ['model' => $model]);
 	}
 
-	public function actionTest() {
+	public function actionDownloadAlbum($owner_id, $album_id, $offset = 0) {
+		set_time_limit(300);
+		$vk = new \VK\Client\VKApiClient();
+		//$owner_id = '-202849544';
+		//$album_id = '279247706';
+		//$offset = 0;
+		$post = $vk->photos()->get(\Yii::$app->params['vkApiKey'], [
+						'owner_id' => $owner_id,
+						'album_id' => $album_id,
+						'offset' => $offset,
+						'count' => 999
+					]);
+		if (isset($post['items'])) {
+			foreach ($post['items'] as $id => $item) {
+				$sizes = array_filter($item['sizes'], fn($key) => ($key['type'] == 'w' || $key['type'] == 'z'));
+				\Yii::debug($sizes);
+				if ($sizes) {
+					$items[] = ['id' => $offset + 1, 'url' => array_values($sizes)[0]['url']];	
+					$offset++;						
+				}
+			}			
+		}
+		$this->massDownload($items, $album_id);
+		var_dump('<pre>', $items); die;
+	}
+
+	public function actionTest($item_id, $checked) {
+		var_dump(ItemsHistory::countChecked($item_id, $checked));
+	}
+
+	private function massDownload($urls, $folder) {
+		foreach ($urls as $url) {
+			$headers;
+			$tempName = time();
+			$file = Yii::$app->basePath . '/uploads/' . $folder . '/' . $tempName;
+			if (!file_exists(Yii::$app->basePath . '/uploads/' . $folder)) {
+			    mkdir(Yii::$app->basePath . '/uploads/' . $folder, 0777, true);
+			}
+			$fp = fopen($file, 'w+');
+			$ch = curl_init($url['url']);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+			curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $header) use (&$headers) {
+					$len = strlen($header);
+					$header = explode(':', $header, 2);
+					if (count($header) < 2) // ignore invalid headers
+					  return $len;		
+					$headers[strtolower(trim($header[0]))][] = trim($header[1]);			
+					return $len;
+				});
+			curl_setopt($ch, CURLOPT_FILE, $fp);
+			$responce = curl_exec($ch);
+			curl_close($ch);
+			\Yii::debug($headers);
+			\Yii::debug(file_exists($file));
+			if (file_exists($file) && filesize($file) !== 0) {
+				rename($file, Yii::$app->basePath . '/uploads/' . $folder . '/' . $url['id'] . '.jpg');
+				//return Yii::$app->basePath . '/uploads/' . $folder . '/' . $id . '.jpg';
+			} else if (file_exists($file)) {
+				unlink($file);
+			}
+		}
+		return false;
 	}
 
 	public function actionYtPlaylist($url) {

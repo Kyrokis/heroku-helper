@@ -17,7 +17,7 @@ class Youtube {
 	 */
 	public static function getPlaylist($url, $reverse = false) {
 		$return = "#EXTM3U\n";
-		$command = 'python ' . __DIR__ . '/get_videos.py -url=' . $url;
+		$command = 'py ' . __DIR__ . '/get_videos.py -url=' . $url;
 		exec($command, $result);
 		$result = json_decode($result[0]);
 		$videos = $result->entries;

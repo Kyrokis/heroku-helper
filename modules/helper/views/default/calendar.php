@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use app\components\Str;
 use yii\helpers\StringHelper;
-use marekpetras\calendarview\CalendarView;
+use app\components\calendarview\CalendarView;
 
 /* @var $this \yii\web\View */
 /* @var $model \app\modules\helper\models\Items */

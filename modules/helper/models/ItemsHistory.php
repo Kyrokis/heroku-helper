@@ -47,7 +47,7 @@ class ItemsHistory extends ActiveRecord {
 	public function rules() {
 		return [
 			[['id', 'item_id', 'dt'], 'integer'],
-			[['now', 'link', 'import'], 'string'],
+			[['now', 'link', 'import', 'checked'], 'string'],
 			[['item_id', 'dt'], 'required'],
 			[['dt_start', 'dt_end'], 'safe'],
 		];
@@ -70,6 +70,7 @@ class ItemsHistory extends ActiveRecord {
 			'item_id' => 'ID итема',
 			'now' => 'Значение',
 			'link' => 'Ссылка',
+			'checked' => 'Просмотрен',
 			'dt' => 'Дата изменения',
 			'dt_start' => 'Начало периода',
 			'dt_end' => 'Конец периода',
@@ -107,6 +108,7 @@ class ItemsHistory extends ActiveRecord {
 		}
 		$query = self::find()->andFilterWhere([
 					'id' => $this->id,
+					'checked' => $this->checked,
 					'item_id' => $itemIds
 				])
 				->andFilterWhere(['between', 'dt', strtotime($this->dt_start), strtotime($this->dt_end . '+1 day') - 1])
@@ -124,6 +126,7 @@ class ItemsHistory extends ActiveRecord {
 		}
 		$query = self::find()->andFilterWhere([
 					'id' => $this->id,
+					'checked' => $this->checked,
 					'item_id' => $itemIds
 				])
 				->andFilterWhere(['between', 'dt', strtotime($this->dt_start), strtotime($this->dt_end . '+1 day') - 1])
@@ -138,6 +141,14 @@ class ItemsHistory extends ActiveRecord {
 	public function count() {
 		$model = new self;
 		return $model->search()->query->count();
+	}
+
+	/**
+	 * Count $this->search() entries.
+	 * @return int
+	 */
+	public static function countChecked($item_id, $checked) {
+		return self::find()->select(['id', 'item_id', 'checked'])->where(['checked' => $checked])->andWhere(['item_id' => $item_id])->orderBy('id')->count();
 	}
 
 	/**

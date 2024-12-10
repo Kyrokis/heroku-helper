@@ -18,7 +18,6 @@ class Api {
 	 * @return string
 	 */
 	public static function getData($template, $value, $allFields) {
-
 		switch ($template->name) {
 			case 'vk.com':
 				return self::vk($template, $value, $allFields);
@@ -32,6 +31,8 @@ class Api {
 				return self::mangalib($template, $value, $allFields);
 			case 'SubsPlease':
 				return self::subsplease($template, $value, $allFields);
+			case 'NanDesuKa':
+				return self::NanDesuKa($template, $value, $allFields);
 		}
 	}
 
@@ -110,7 +111,7 @@ class Api {
 			$data['groups'] = [$link[2]];
 		}
 		$client = new Client();
-		$response = $client->get('https://api.mangadex.org/chapter', $data, ['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36'])->send();
+		$response = $client->get('https://api.mangadex.org/chapter', $data, ['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'])->send();
 		\Yii::debug($response->data);
 		$content = $response->data['data'][0];
 		$new = [
@@ -169,9 +170,16 @@ class Api {
 	}
 
 	public static function subsplease($template, $value, $allFields) {
+		$value->link = 'https://nyaa.si/user/subsplease?f=0&c=0_0&q=' . $value->link . '&fresh_load_' . time();
 		//$value->link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode('https://nyaa.si/user/subsplease?f=0&c=0_0&q=' . $value->link . '&fresh_load_' . time());
-		$value->link = 'https://nyaa.land/user/subsplease?f=0&c=0_0&q=' . urlencode($value->link);
+		//$value->link = 'https://nyaa.land/user/subsplease?f=0&c=0_0&q=' . urlencode($value->link);
 		//var_dump($value); die;
+		$new = QueryList::getData($template, $value, $allFields);
+		return $new;
+	}
+
+	public static function nandesuka($template, $value, $allFields) {
+		$value->link = 'https://nyaa.si/user/NanDesuKa?f=0&c=0_0&q=' . $value->link . '&fresh_load_' . time();
 		$new = QueryList::getData($template, $value, $allFields);
 		return $new;
 	}

@@ -36,6 +36,7 @@ class Helping extends BaseObject implements \yii\queue\JobInterface {
 			}
 		} catch (\Exception $e) {
 			$helpingError = true;
+			var_dump($e);
 			var_dump('Error error error');
 		}
 		if ($helpingError || (isset($new) && $new['link_new'] == '' && $new['now'] == '')) {
@@ -53,7 +54,7 @@ class Helping extends BaseObject implements \yii\queue\JobInterface {
 		if ((($template->update_type == '0' && (($new['now'] != $value->now && $new['now'] != $value->new) || ($new['now'] == $value->now && $new['now'] != $value->new))) || 
 			($template->update_type == '1' && ($new['link_new'] != $value->link_new)) || 
 			($value->error == '1')) 
-			&& ((isset($prevValue) && ($prevValue->now != $new['now'] && $prevValue->link != $new['link_new'])) || !isset($prevValue) || $value->error == '1')
+			//&& ((isset($prevValue) && ($prevValue->now != $new['now'] && $prevValue->link != $new['link_new'])) || !isset($prevValue) || $value->error == '1')
 		) {
 			if (($model = Items::findOne($value->id)) !== null) {
 				$error = '-1';
@@ -70,7 +71,6 @@ class Helping extends BaseObject implements \yii\queue\JobInterface {
 		} else if (!$only_new && ($new['now'] != $value->now && $new['now'] == $value->new)) {
 			$item = ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $value->new, 'link_new' => $value->link_new, 'media' => $media, 'error' => $value->error];
 		}
-
 		//send info in the telegram message
 		if ($telegram && ($item && $item['error'] == '0')) {
 			$fullLink = Template::getFullLink($item['link_new'], $item['id_template']);
@@ -97,14 +97,19 @@ class Helping extends BaseObject implements \yii\queue\JobInterface {
 					Yii::debug($e);
 				}						
 			} else {
-				$result = Yii::$app->telegram->sendMessage([
-					'chat_id' => $idTelegram,
-					'text' => "<b>$item[title]</b> \n$linkText",
-					'parse_mode' => 'HTML',
-					'disable_web_page_preview' => true,
-					'reply_markup' => json_encode($reply_markup),
-				]);
-				Yii::debug($result);
+				try {
+					$result = Yii::$app->telegram->sendMessage([
+						'chat_id' => $idTelegram,
+						'text' => "<b>$item[title]</b> \n$linkText",
+						'parse_mode' => 'HTML',
+						'disable_web_page_preview' => true,
+						'reply_markup' => json_encode($reply_markup),
+					]);
+					Yii::debug(json_encode($result));
+				} catch (ClientException $e) {
+					var_dump($e);
+					Yii::debug($e);
+				}	
 			}
 			Yii::$app->controllerNamespace = 'app\modules\telegram\controllers';
 			$result = Yii::$app->runAction('default/get-torrent', ['url' => $fullLink, 'idTelegram' => $idTelegram]);

@@ -79,12 +79,13 @@ echo GridView::widget([
 				return $data->user->login;
 			},
 			'width' => '150px',
-			'filterType' => GridView::FILTER_SELECT2,
+			'filter' => false,
+			/*'filterType' => GridView::FILTER_SELECT2,
 			'filter' => User::all(), 
 			'filterWidgetOptions' => [
 				'pluginOptions' => ['placeholder' => '',  'allowClear' => true],
 			],
-			'filterInputOptions' => ['multiple' => true, /*'disabled' => !\Yii::$app->user->identity?->admin*/],
+			'filterInputOptions' => ['multiple' => true, 'disabled' => !\Yii::$app->user->identity?->admin],*/
 		],
 		[
 			'attribute' => 'title',
@@ -92,20 +93,25 @@ echo GridView::widget([
 			'value' => function ($data) {
 				$link = $data->link;
 				if ($data->template->name == 'vk.com') {
-					$link = 'https://www.vk.com/club' . mb_substr($data->link, 1);
+					$link = 'https://www.vk.com/club' . mb_substr($link, 1);
 				} else if ($data->template->name == 'mangadex.org') {
-					$link = 'https://mangadex.org/title/' . explode(',', $data->link)[0];
+					$link = 'https://mangadex.org/title/' . explode(',', $link)[0];
 				} else if ($data->template->name == 'proxyrarbg.org') {
-					$link = 'https://proxyrarbg.org/torrents.php?search=' . $data->link;
+					$link = 'https://proxyrarbg.org/torrents.php?search=' . $link;
 				} else if ($data->template->name == 'rss') {
-					$link = explode(',', $data->link);
+					$link = explode(',', $link);
 					$link = end($link);
 				} else if ($data->template->id == 8) {
-					//$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($data->link . '&fresh_load_' . time());
+					$link = $link . '&fresh_load_' . time();
+					$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($link);
 				} else if ($data->template->name == 'SubsPlease') {
-					//$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode('https://nyaa.si/user/subsplease?f=0&c=0_0&q=' . $data->link . '&fresh_load_' . time());
-					$link = 'https://nyaa.land/user/subsplease?f=0&c=0_0&q=' . urlencode($data->link);
+					$link = 'https://nyaa.si/user/subsplease?f=0&c=0_0&q=' . $link . '&fresh_load_' . time();
+					$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($link);
+				} else if ($data->template->name == 'NanDesuKa') {
+					$link = 'https://nyaa.si/user/NanDesuKa?f=0&c=0_0&q=' . $link . '&fresh_load_' . time();
+					$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($link);
 				}
+				//$link = str_replace('nyaa.si', 'nyaa.land', $link);
 				return Html::a($data->title, $link, ['target' => '_blank']) . ' ' . Html::a('<span class="glyphicon glyphicon-time"></span>', ['/helper/default/history', 'ItemsHistory[item_id][]' => $data->id], ['style' => 'color: #6c757d!important;', 'target' => '_blank', 'data-pjax' => '0']);
 			},
 			'filterInputOptions' => [
@@ -127,37 +133,93 @@ echo GridView::widget([
 			],
 			'filterInputOptions' => ['multiple' => true],
 		],
-		[
+		/*[
 			'attribute' => 'now',
 			'format' => 'raw',
 			'value' => function ($data) {
-				$text = nl2br(StringHelper::truncate($data->now, 100, '...', null, true));
-				$tooltip = Html::tag('span', $text, [
-					'title' => $data->now,
-					'data-toggle' => 'tooltip',
-				]);
-				return $tooltip;
+				if ($lastChecked = $data->lastChecked) {
+					$lastChecked = $data->lastChecked;
+					$now = $lastChecked->now;
+					$link = $lastChecked->link;
+				} else if ($data->now) {
+					$now = $data->now;
+					$link = '';
+				}
+				if ($now) {
+					$text = nl2br(StringHelper::truncate($now, 100, '...', null, true));
+					$tooltip = Html::tag('span', $text, [
+						'title' => $now,
+						'data-toggle' => 'tooltip',
+					]);
+					if ($link) {
+						$out = Html::a($tooltip, $link, ['target' => '_blank', 'data-pjax' => '0']);
+					} else {
+						$out = $tooltip;
+					}
+				}
+				return $out;
+			},
+			'filter' => false,
+		],*/
+		[
+			'attribute' => 'now',
+			'format' => 'raw',
+			'label' => 'Первый непросмотренный',
+			'value' => function ($data) {
+				$out = '';
+				$checkbox = '';
+				if ($firstUnchecked = $data->firstUnchecked) {
+					$now = $firstUnchecked->now;
+					$link = $firstUnchecked->link;
+					$checkbox = Html::checkbox('checked[]', $firstUnchecked->checked, ['data-id' => $firstUnchecked->id, 'data-type' => 'first', 'class' => 'checkHistory']) . ' ';
+				} else if ($data->now) {
+					$now = $data->now;
+					$link = Template::getFullLink($data->link_new, $data->id_template);
+				}
+				if ($now) {
+					$text = nl2br(StringHelper::truncate($now, 100, '...', null, true));
+					$tooltip = Html::tag('span', $text, [
+						'title' => $now,
+						'data-toggle' => 'tooltip',
+					]);
+					if ($link) {
+						$out = Html::a($tooltip, $link, ['target' => '_blank', 'data-pjax' => '0']);
+					} else {
+						$out = $tooltip;
+					}
+				}
+				return $checkbox . $out;
 			},
 			'filter' => false,
 		],
 		[
 			'attribute' => 'new',
 			'format' => 'raw',
+			'label' => 'Последний непросмотренный',
 			'value' => function ($data) {
 				$out = '';
-				if ($data->new) {
-					$text = nl2br(StringHelper::truncate($data->new, 100, '...', null, true));
+				$checkbox = '';
+				if ($lastUnchecked = $data->lastUnchecked) {
+					$new = $lastUnchecked->now;
+					$link = $lastUnchecked->link;
+					$checkbox = Html::checkbox('checked[]', $lastUnchecked->checked, ['data-id' => $lastUnchecked->id, 'data-type' => 'last', 'class' => 'checkHistory']) . ' ';
+				} else if ($data->new) {
+					$new = $data->new;
+					$link = Template::getFullLink($data->link_new, $data->id_template);
+				}
+				if ($new) {
+					$text = nl2br(StringHelper::truncate($new, 100, '...', null, true));
 					$tooltip = Html::tag('span', $text, [
-						'title' => $data->new,
+						'title' => $new,
 						'data-toggle' => 'tooltip',
 					]);
-					if ($data->link_new) {
-						$out = Html::a($tooltip, Template::getFullLink($data->link_new, $data->id_template), ['target' => '_blank', 'data-pjax' => '0']);
+					if ($link) {
+						$out = Html::a($tooltip, $link, ['target' => '_blank', 'data-pjax' => '0']);
 					} else {
 						$out = $tooltip;
 					}
 				}
-				return $out;
+				return $checkbox . $out;
 			},
 			'filter' => false,
 		],
@@ -235,8 +297,9 @@ echo GridView::widget([
 				},
 
 			],
+			'contentOptions' => ['style' => 'width: 65px'],
 			'options' => [
-				'width' => '55px',
+
 			],
 			
 		]
