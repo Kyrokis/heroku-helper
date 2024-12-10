@@ -7,6 +7,7 @@ use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use app\modules\user\models\User;
 use app\modules\helper\models\Items;
+use app\components\Str;
 
 /**
  * This is the model class for table "template".
@@ -96,7 +97,7 @@ class template extends ActiveRecord {
 			[['name', 'type', 'del'], 'string'],
 			[['title1', 'title2', 'link_new1', 'link_new2', 'link_img1', 'link_img2', 'new1', 'new2', 'full_link1', 'full_link2', 'type', 'update_type', 'del'], 'string'],
 			[['name', 'type'], 'required'],
-			[['title', 'link_new', 'link_alter', 'link_img', 'new', 'full_link'], 'each', 'rule' => ['string']],
+			[['title', 'link_new', 'link_img', 'new', 'full_link'], 'each', 'rule' => ['string']],
 			[['title1', 'title2', 'link_new1', 'link_new2', 'new1', 'new2'], 'required', 'when' => function($model) {return $model->type != 2;}, 
 																						'whenClient' => "function (attribute, value) { return $('#template-type').val() != '2'; }"],
 			[['title'], 'safe', 'on' => self::SCENARIO_SEARCH],
@@ -153,7 +154,6 @@ class template extends ActiveRecord {
 			'new1' => 'Новый 1',
 			'new2' => 'Новый 2',
 			'link_new' => 'Ссылка на новинку',
-			'link_alter' => 'Альтернативная ссылка',
 			'link_new1' => 'Ссылка на новинку 1',
 			'link_new2' => 'Ссылка на новинку 2',
 			'link_img' => 'Ссылка на постер',
@@ -286,6 +286,15 @@ class template extends ActiveRecord {
 	public static function getFullLink($link_new, $id_template) {
 		$template = self::findOne($id_template);
 		return $template->full_link[0] . $link_new . $template->full_link[1];
+	}
+
+	/**
+	 * Get short link
+	 * @return string
+	 */
+	public static function getShortLink($link_new, $id_template) {
+		$template = self::findOne($id_template);
+		return Str::explode($template->full_link, $link_new);
 	}
 
 }

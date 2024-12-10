@@ -33,6 +33,10 @@ class Str {
 	 * @return string
 	 */
 	public static function explode($delimiter, $string, $offset = 0) {
-		return explode($delimiter[1], explode($delimiter[0], $string)[$offset + 1])[0];
+		if ($delimiter[1] && $delimiter[0]) {
+			return explode($delimiter[1], explode($delimiter[0], $string)[$offset + 1])[0];
+		} else if (!$delimiter[1] && $delimiter[0]) {
+			return explode($delimiter[0], $string)[$offset + 1];
+		}
 	}
 }

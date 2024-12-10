@@ -166,27 +166,41 @@ class DefaultController extends Controller {
 	 */
 	public function actionCheckHistory($id, $value, $type = '') {
 		$model = ItemsHistory::findOne($id);
+		$item = $model->item;
 		$user = Yii::$app->user;
-		if (!$user->identity->admin && $user->id != $model->item->user_id) {
+		if (!$user->identity->admin && $user->id != $item->user_id) {
 			throw new \yii\web\ForbiddenHttpException('У Вас нет прав на это действие');
 		}
 		$model->checked = $value == 'true' ? '1' : '0';
-		if ($model->save() && $type != '') {
-			$newItem = $type == 'last' ? $model->item->lastUnchecked : $model->item->firstUnchecked;
-			$new = $newItem->now;
-			$link = $newItem->link;
-			$checkbox = Html::checkbox('checked[]', $newItem->checked, ['data-id' => $newItem->id, 'data-type' => $type, 'class' => 'checkHistory']) . ' ';
-			$text = nl2br(StringHelper::truncate($new, 100, '...', null, true));
-			$tooltip = Html::tag('span', $text, [
-				'title' => $new,
-				'data-toggle' => 'tooltip',
-			]);
-			if ($link) {
-				$out = Html::a($tooltip, $link, ['target' => '_blank', 'data-pjax' => '0']);
+		if ($model->save()/* && $type != ''*/) {
+			if (($countChecked = ItemsHistory::countChecked($model->item_id, '0')) > 0) {
+				if ($countChecked == 1) {
+					$item->now = $item->lastChecked->now;
+					$item->new = $item->lastUnchecked->now;
+					$item->link_new = Template::getShortLink($item->lastUnchecked->link, $item->id_template);
+					$item->save();
+				}
+				if ($type != '' && $newItem = $type == 'last' ? $item->lastUnchecked : $item->firstUnchecked) {
+					$new = $newItem->now;
+					$link = $item->link_alter ? : $newItem->link;
+					$checkbox = Html::checkbox('checked[]', $newItem->checked, ['data-id' => $newItem->id, 'data-type' => $type, 'class' => 'checkHistory']) . ' ';
+					$text = nl2br(StringHelper::truncate($new, 100, '...', null, true));
+					$tooltip = Html::tag('span', $text, [
+						'title' => $new,
+						'data-toggle' => 'tooltip',
+					]);
+					if ($link) {
+						$out = Html::a($tooltip, $link, ['target' => '_blank', 'data-pjax' => '0']);
+					} else {
+						$out = $tooltip;
+					}
+					return $checkbox . $out;				
+				}
 			} else {
-				$out = $tooltip;
+				$item->now = $item->new;
+				$item->save();
 			}
-			return $checkbox . $out;
+			return true;
 		}
 		return true;
 	}

@@ -28,8 +28,15 @@ $attributes = [
 			],
 		],
 	],
-	'title' => [],
-	'link_new' => [],
+	[
+		'columns' => 2,
+		'labelOptions' => ['class' => 'hidden'],
+		'attributes' => [
+			'title' => ['label' => 'Название'],
+			'link_new' => ['label' => 'Ссылка на новинку'],
+		],
+	],
+	'link_alter' => [],
 	'now' => ['type' => Form::INPUT_TEXTAREA],
 	'new' => ['type' => Form::INPUT_TEXTAREA],
 	[

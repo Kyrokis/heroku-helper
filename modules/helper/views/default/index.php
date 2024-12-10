@@ -170,11 +170,11 @@ echo GridView::widget([
 				$checkbox = '';
 				if ($firstUnchecked = $data->firstUnchecked) {
 					$now = $firstUnchecked->now;
-					$link = $firstUnchecked->link;
+					$link = $data->link_alter ? : $firstUnchecked->link;
 					$checkbox = Html::checkbox('checked[]', $firstUnchecked->checked, ['data-id' => $firstUnchecked->id, 'data-type' => 'first', 'class' => 'checkHistory']) . ' ';
 				} else if ($data->now) {
 					$now = $data->now;
-					$link = Template::getFullLink($data->link_new, $data->id_template);
+					$link = $data->link_alter ? : Template::getFullLink($data->link_new, $data->id_template);
 				}
 				if ($now) {
 					$text = nl2br(StringHelper::truncate($now, 100, '...', null, true));
@@ -201,11 +201,11 @@ echo GridView::widget([
 				$checkbox = '';
 				if ($lastUnchecked = $data->lastUnchecked) {
 					$new = $lastUnchecked->now;
-					$link = $lastUnchecked->link;
+					$link = $data->link_alter ? : $lastUnchecked->link;
 					$checkbox = Html::checkbox('checked[]', $lastUnchecked->checked, ['data-id' => $lastUnchecked->id, 'data-type' => 'last', 'class' => 'checkHistory']) . ' ';
 				} else if ($data->new) {
 					$new = $data->new;
-					$link = Template::getFullLink($data->link_new, $data->id_template);
+					$link = $data->link_alter ? : Template::getFullLink($data->link_new, $data->id_template);
 				}
 				if ($new) {
 					$text = nl2br(StringHelper::truncate($new, 100, '...', null, true));

@@ -100,8 +100,18 @@ var site = {};
 		$.get('/helper/default/check-history', {'id': id, 'value': value, 'type': type}).done(function (data) {
 			if (data) {
 				if (type != '') {
-					item.next().remove();
-					item.parent().html(data);					
+					if (data == '1') {
+						if (type == 'first') {
+							item.parent().next().children('input').remove();
+						} else if (type == 'last') {
+							item.parent().prev().children('input').remove();
+						}
+						item.parent().parent().removeClass('info');
+						item.remove();
+					} else {
+						item.next().remove();
+						item.parent().html(data);
+					}
 				}
 				console.log('Все прошло так');
 			} else {
