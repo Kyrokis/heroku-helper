@@ -76,8 +76,9 @@ var site = {};
 		var id = item.data('id');
 		$.get('/helper/default/check', {'id': id}).done(function (data) {
 			if (data) {
-				var titleNew = item.parent().prev().prev().children().html();
+				var titleNew = item.parent().prev().prev().children('a').html();
 				item.parent().prev().prev().prev().html(titleNew);
+				item.parent().prev().prev().children('input').remove();
 				item.parent().parent().removeClass('info');
 				item.next().remove();
 				item.remove();

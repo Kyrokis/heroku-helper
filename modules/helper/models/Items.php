@@ -95,7 +95,7 @@ class Items extends ActiveRecord {
 	 * @return \app\models\ItemsHistory
 	 */
 	public function getHistory() {
-		return $this->hasMany(ItemsHistory::className(), ['item_id' => 'id'])->orderBy('dt desc');
+		return $this->hasMany(ItemsHistory::className(), ['item_id' => 'id'])->orderBy('id desc');
 	}
 
 	/**
@@ -104,6 +104,14 @@ class Items extends ActiveRecord {
 	 */
 	public function getPrevValue() {
 		return $this->hasOne(ItemsHistory::className(), ['item_id' => 'id'])->offset(1)->orderBy('dt desc');
+	}
+
+	/**
+	 * ItemsHistory
+	 * @return \app\models\ItemsHistory
+	 */
+	public function getLastValue() {
+		return $this->hasOne(ItemsHistory::className(), ['item_id' => 'id'])->orderBy('dt desc');
 	}
 
 	/**
@@ -121,12 +129,20 @@ class Items extends ActiveRecord {
 	public function getFirstUnchecked() {
 		return $this->hasOne(ItemsHistory::className(), ['item_id' => 'id'])->andFilterWhere(['checked' => '0'])->orderBy('dt asc');
 	}
-/**
+	/**
 	 * ItemsHistory
 	 * @return \app\models\ItemsHistory
 	 */
 	public function getLastUnchecked() {
 		return $this->hasOne(ItemsHistory::className(), ['item_id' => 'id'])->andFilterWhere(['checked' => '0'])->orderBy('dt desc');
+	}
+
+	/**
+	 * ItemsHistory
+	 * @return \app\models\ItemsHistory
+	 */
+	public function getUncheckedCount() {
+		return $this->hasMany(ItemsHistory::className(), ['item_id' => 'id'])->andFilterWhere(['checked' => '0'])->count();
 	}
 
 	/**
@@ -235,7 +251,9 @@ class Items extends ActiveRecord {
 		//$user_id = Yii::$app->user->identity->admin ? $this->user_id : Yii::$app->user->id;
 		$user_id = $this->user_id;
 		$del = $this->del ? : '0';
-		$query = self::find()->andFilterWhere([
+		$query = self::find()
+				->joinWith('history')
+				->andFilterWhere([
 					'id' => $this->id,
 					'link' => $this->link,
 					'user_id' => $user_id,
@@ -244,7 +262,8 @@ class Items extends ActiveRecord {
 					'del' => $del,
 				])
 				->andFilterWhere(['ILIKE', 'title', $this->title])
-				->orderBy('user_id, (dt_update is null), (now != new) desc, dt_update desc, id');
+				->groupBy('items.id')
+				->orderBy("user_id, (dt_update is null), (COUNT(CASE WHEN items_history.checked = '0' THEN 1 END) > 0) desc, dt_update desc, id");
 
 		return $query;
 	}

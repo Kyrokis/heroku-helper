@@ -44,14 +44,14 @@ class Helping extends BaseObject implements \yii\queue\JobInterface {
 				$model->error = '1';
 				//$model->dt_update = time();
 				$model->save(FALSE, ['error', 'dt_update']);
-				return ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $value->now, 'link_new' => $value->link_new, 'error' => '1'];
+				return ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $value->lastValue, 'link_new' => $value->link_new, 'error' => '1'];
 			}
 		}
 		$new['now'] = ($new['now'] != '') ? $new['now'] : $new['link_new'];
 		$media = isset($new['media']) ? $new['media'] : '';
 		$item = false;
 		//var_dump($new['now']);
-		if ((($template->update_type == '0' && (($new['now'] != $value->now && $new['now'] != $value->new) || ($new['now'] == $value->now && $new['now'] != $value->new))) || 
+		if ((($template->update_type == '0' && (($new['now'] != $value->lastValue && $new['now'] != $value->new) || ($new['now'] == $value->lastValue && $new['now'] != $value->new))) || 
 			($template->update_type == '1' && ($new['link_new'] != $value->link_new)) || 
 			($value->error == '1')) 
 			//&& ((isset($prevValue) && ($prevValue->now != $new['now'] && $prevValue->link != $new['link_new'])) || !isset($prevValue) || $value->error == '1')
@@ -68,7 +68,7 @@ class Helping extends BaseObject implements \yii\queue\JobInterface {
 				$model->save();						
 				$item = ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $new['now'], 'link_new' => $new['link_new'], 'media' => $media, 'error' => $error];
 			}
-		} else if (!$only_new && ($new['now'] != $value->now && $new['now'] == $value->new)) {
+		} else if (!$only_new && ($new['now'] != $value->lastValue && $new['now'] == $value->new)) {
 			$item = ['id' => $value->id, 'id_template' => $value->id_template, 'title' => $value->title, 'new' => $value->new, 'link_new' => $value->link_new, 'media' => $media, 'error' => $value->error];
 		}
 		//send info in the telegram message

@@ -55,7 +55,7 @@ echo GridView::widget([
 		'type' => GridView::TYPE_DEFAULT,
 	],
 	'rowOptions' => function ($data) {
-		if ($data->now != $data->new) {
+		if ($data->uncheckedCount > 0) {
 			return ['class' => 'info'];
 		} else if ($data->error) {
 			return ['class' => 'danger'];
@@ -112,7 +112,7 @@ echo GridView::widget([
 					$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($link);
 				}
 				//$link = str_replace('nyaa.si', 'nyaa.land', $link);
-				return Html::a($data->title, $link, ['target' => '_blank']) . ' ' . Html::a('<span class="glyphicon glyphicon-time"></span>', ['/helper/default/history', 'ItemsHistory[item_id][]' => $data->id], ['style' => 'color: #6c757d!important;', 'target' => '_blank', 'data-pjax' => '0']);
+				return Html::a($data->title, $link, ['target' => '_blank']) . ' ' . Html::a('<span class="glyphicon glyphicon-time"></span>', ['/helper/default/history', 'ItemsHistory[item_id][]' => $data->id, 'ItemsHistory[checked]' => ($data->firstUnchecked ? '0' : '')], ['style' => 'color: #6c757d!important;', 'target' => '_blank', 'data-pjax' => '0']);
 			},
 			'filterInputOptions' => [
 				'autocomplete' => 'off',
@@ -168,7 +168,7 @@ echo GridView::widget([
 			'value' => function ($data) {
 				$out = '';
 				$checkbox = '';
-				if ($firstUnchecked = $data->firstUnchecked) {
+				if ($data->uncheckedCount > 1 && $firstUnchecked = $data->firstUnchecked) {
 					$now = $firstUnchecked->now;
 					$link = $data->link_alter ? : $firstUnchecked->link;
 					$checkbox = Html::checkbox('checked[]', $firstUnchecked->checked, ['data-id' => $firstUnchecked->id, 'data-type' => 'first', 'class' => 'checkHistory']) . ' ';
@@ -249,7 +249,7 @@ echo GridView::widget([
 			'buttons' => [
 				'check' => function ($url, $model) {
 					$button = '';
-					if ($model->now != $model->new) {
+					if ($model->uncheckedCount > 0) {
 						$button = Html::a('<span class="glyphicon glyphicon-film text-success"></span> <span class="glyphicon glyphicon-ok text-success"></span>', '#', [
 							'class' => 'check',
 							'title' => 'Check',

@@ -73,9 +73,6 @@ class DefaultController extends Controller {
 		if (!$model->dt_end) {
 			$model->dt_end = date('d.m.Y', time());
 		}
-		if (!$model->checked) {
-			$model->checked = '0';
-		}
 		$model->dt = $model->dt_start . ' - ' . $model->dt_end;
 		return $this->render('history', ['model' => $model]);
 	}

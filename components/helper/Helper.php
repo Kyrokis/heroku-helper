@@ -37,20 +37,21 @@ class Helper {
 		if ((count($include) == 0 && count($exclude) == 0)) {
 			$check = true;
 		} else {
+			$excludeCheck = true;
 			if (count($exclude) > 0) {
-				$excludeCheck = true;
 				foreach ($exclude as $word) {
 					if (mb_strpos(mb_strtolower($value), mb_strtolower($word)) !== false) {
 						$excludeCheck = false;
 						break;
 					}
 				}
-				if ($excludeCheck) {
+				/*if ($excludeCheck) {
 					$check = true;
 				} else {
 					$check = false;
-				}
+				}*/
 			}
+			$includeCheck = true;
 			if (count($include) > 0) {
 				foreach ($include as $word) {
 					$includeCheck = false;
@@ -59,11 +60,16 @@ class Helper {
 						break;
 					}
 				}
-				if ($includeCheck) {
+				/*if ($includeCheck) {
 					$check = true;
 				} else {
 					$check = false;
-				}
+				}*/
+			}
+			if ($includeCheck && $excludeCheck) {
+				$check = true;
+			} else {
+				$check = false;
 			}
 		}
 		return $check;
