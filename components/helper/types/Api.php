@@ -27,12 +27,6 @@ class Api {
 				return self::rss($template, $value, $allFields);
 			case 'proxyrarbg.org':
 				return self::proxyrarbg($template, $value, $allFields);
-			case 'mangalib.me':
-				return self::mangalib($template, $value, $allFields);
-			case 'SubsPlease':
-				return self::subsplease($template, $value, $allFields);
-			case 'NanDesuKa':
-				return self::NanDesuKa($template, $value, $allFields);
 		}
 	}
 
@@ -158,29 +152,6 @@ class Api {
 			$new['title'] = $content['title'];
 			$new['link_img'] = '';
 		}
-		return $new;
-	}
-
-	public static function mangalib($template, $value, $allFields) {
-		$new = Explode::getData($template, $value, $allFields);
-		$new['now'] = json_decode($new['now']);
-		$link_new = explode('","chapter_volume":', $new['link_new']);
-		$new['link_new'] = $value->link . "/v$link_new[1]/c$link_new[0]";
-		return $new;
-	}
-
-	public static function subsplease($template, $value, $allFields) {
-		$value->link = 'https://nyaa.si/user/subsplease?f=0&c=0_0&q=' . $value->link . '&fresh_load_' . time();
-		//$value->link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode('https://nyaa.si/user/subsplease?f=0&c=0_0&q=' . $value->link . '&fresh_load_' . time());
-		//$value->link = 'https://nyaa.land/user/subsplease?f=0&c=0_0&q=' . urlencode($value->link);
-		//var_dump($value); die;
-		$new = QueryList::getData($template, $value, $allFields);
-		return $new;
-	}
-
-	public static function nandesuka($template, $value, $allFields) {
-		$value->link = 'https://nyaa.si/user/NanDesuKa?f=0&c=0_0&q=' . $value->link . '&fresh_load_' . time();
-		$new = QueryList::getData($template, $value, $allFields);
 		return $new;
 	}
 }

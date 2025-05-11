@@ -333,7 +333,7 @@ class Items extends ActiveRecord {
 	 * @return integer
 	 */
 	public function getDt_estimated() {
-		$dt = $this->dt_update;
+		$dt = $this->lastValue->dt;
 		$estimate = $this->estimate;
 		if ($estimate) {
 			$dt_estimated = [$dt + $estimate[0], $dt + $estimate[1]];

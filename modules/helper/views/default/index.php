@@ -227,12 +227,13 @@ echo GridView::widget([
 			'attribute' => 'dt_update',
 			'format' => 'raw',
 			'value' => function ($data) {
-				$dt_update = $data->dt_update ? Str::dateEngToRu(date('d F H:i', $data->dt_update)) : '';
+				$dt = $data->lastValue->dt;
+				$dt_update = $dt ? Str::dateEngToRu(date('d F H:i', $dt)) : '';
 				$estimate = $data->estimate;
 				$title = 'Ожидайте';
 				if ($estimate) {
-					$estimate_start = Str::dateEngToRu(date('d F H:i', $data->dt_update + $estimate[0]));
-					$estimate_end = Str::dateEngToRu(date('d F H:i', $data->dt_update + $estimate[1]));
+					$estimate_start = Str::dateEngToRu(date('d F H:i', $dt + $estimate[0]));
+					$estimate_end = Str::dateEngToRu(date('d F H:i', $dt + $estimate[1]));
 					$title = 'Ожидается: ' . $estimate_start . ' - ' . $estimate_end;
 				}
 				$tooltip = Html::tag('span', $dt_update, [
