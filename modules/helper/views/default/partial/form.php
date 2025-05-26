@@ -36,7 +36,14 @@ $attributes = [
 			'link_new' => ['label' => 'Ссылка на новинку'],
 		],
 	],
-	'link_alter' => [],
+	[
+		'columns' => 2,
+		'labelOptions' => ['class' => 'hidden'],
+		'attributes' => [
+			'link_alter' => ['label' => 'Альтернативная ссылка'],
+			'link_additional' => ['label' => 'Дополнительная ссылка'],
+		],
+	],
 	'now' => ['type' => Form::INPUT_TEXTAREA],
 	'new' => ['type' => Form::INPUT_TEXTAREA],
 	[

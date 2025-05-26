@@ -36,7 +36,7 @@ class Helping extends BaseObject implements \yii\queue\JobInterface {
 			}
 		} catch (\Exception $e) {
 			$helpingError = true;
-			var_dump($e);
+			//var_dump($e);
 			var_dump('Error error error');
 		}
 		if ($helpingError || (isset($new) && $new['link_new'] == '' && $new['now'] == '')) {

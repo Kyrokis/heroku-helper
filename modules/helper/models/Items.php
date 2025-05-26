@@ -66,7 +66,7 @@ class Items extends ActiveRecord {
 	public function rules() {
 		return [
 			[['id', 'user_id', 'id_template', 'offset', 'dt_update'], 'integer'],
-			[['title', 'link', 'link_img', 'link_new', 'link_alter', 'now', 'new', 'error', 'del', 'linkSearch', 'linkReplace', 'titleSearch', 'titleReplace'], 'string'],
+			[['title', 'link', 'link_img', 'link_new', 'link_alter', 'link_additional', 'now', 'new', 'error', 'del', 'linkSearch', 'linkReplace', 'titleSearch', 'titleReplace'], 'string'],
 			[['title', 'link', 'id_template'], 'required', 'on' => self::SCENARIO_CREATE],
 			[['title', 'link', 'include', 'exclude'], 'safe', 'on' => self::SCENARIO_SEARCH],
 			[['id'], 'required', 'on' => self::SCENARIO_MASSUPDATE],
@@ -165,6 +165,7 @@ class Items extends ActiveRecord {
 			'link_img' => 'Ссылка на постер (Не используется)',
 			'link_new' => 'Ссылка на новинку',
 			'link_alter' => 'Альтернативная ссылка',
+			'link_additional' => 'Дополнительная ссылка',
 			'now' => 'Сейчас',
 			'new' => 'Новый',
 			'id_template' => 'Шаблон',

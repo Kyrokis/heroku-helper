@@ -267,7 +267,7 @@ class template extends ActiveRecord {
 	 * @return array
 	 */
 	public static function all() {
-		return ArrayHelper::map(self::find()->andWhere(['OR', ['user_id' => Yii::$app->user->id], ['IS', 'user_id', null]])->andWhere(['del' => '0'])->all(), 'id', 'name');
+		return ArrayHelper::map(self::find()->andWhere(['OR', ['user_id' => Yii::$app->user->id], ['IS', 'user_id', null]])->andWhere(['del' => '0'])->orderBy('id DESC')->all(), 'id', 'name');
 	}
 
 	/**

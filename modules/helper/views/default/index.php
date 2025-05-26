@@ -219,7 +219,8 @@ echo GridView::widget([
 						$out = $tooltip;
 					}
 				}
-				return $checkbox . $out;
+				$additional = $data->link_additional ? ' ' . Html::a('<span class="glyphicon glyphicon-arrow-right"></span>', $data->link_additional, ['style' => 'color: #6c757d!important;', 'target' => '_blank', 'data-pjax' => '0']) : '';
+				return $checkbox . $out . $additional;
 			},
 			'filter' => false,
 		],
