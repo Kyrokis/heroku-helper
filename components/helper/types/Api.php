@@ -23,6 +23,8 @@ class Api {
 				return self::vk($template, $value, $allFields);
 			case 'mangadex.org':
 				return self::mangadex($template, $value, $allFields);
+			case 'mangalib.me':
+				return self::mangalib($template, $value, $allFields);
 			case 'rss':
 				return self::rss($template, $value, $allFields);
 			case 'proxyrarbg.org':
@@ -123,6 +125,26 @@ class Api {
 		}
 		return $new;
 	}
+
+	public static function mangalib($template, $value, $allFields) {
+		$client = new Client();
+		$title = end(explode('/', $value->link));
+		$response = $client->get("https://api.cdnlibs.org/api/manga/$title/chapters")->send();
+		$chapters = array_reverse($response->data['data']);
+		$chapter = $chapters[$value->offset];
+		$new = [
+			'now' => $chapter['name'] ? : "Том $chapter[volume] Глава $chapter[number]", 
+			'link_new' => "https://mangalib.me/ru/$title/read/v$chapter[volume]/c$chapter[number]"
+		];
+		if ($allFields) {
+			$clientTitle = new Client();
+			$responseTitle = $client->get("https://api.cdnlibs.org/api/manga/$title")->send();
+			$new['title'] = $responseTitle->data['data']['name'];
+			$new['link_img'] = $responseTitle->data['data']['cover']['default'];
+		}
+		return $new;
+	}
+
 
 	public static function proxyrarbg($template, $value, $allFields) {
 		$command = 'python ' . \Yii::$app->basePath  . '/web/get_rarbg.py -query="' . $value->link . '"';

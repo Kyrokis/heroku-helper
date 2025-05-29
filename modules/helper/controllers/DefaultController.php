@@ -76,6 +76,21 @@ class DefaultController extends Controller {
 		$model->dt = $model->dt_start . ' - ' . $model->dt_end;
 		return $this->render('history', ['model' => $model]);
 	}
+	/**
+	 * History page
+	 * @return json
+	 */
+	public function actionUpdateHistory($id) {
+		$model = ItemsHistory::findOne($id);
+		$user = Yii::$app->user;
+		if (!$user->identity->admin && $user->id != $model->user_id) {
+			throw new \yii\web\ForbiddenHttpException('У Вас нет прав на это действие');
+		}
+		if ($model->load(\Yii::$app->request->post()) && $model->save()) {
+			return $this->redirect(['index']);
+		}
+		return $this->render('update-history', ['model' => $model]);
+	}
 
 	public function actionHistoryCalendar() {
 		$model = new ItemsHistory();
@@ -634,8 +649,7 @@ class DefaultController extends Controller {
 		var_dump('<pre>', $items); die;
 	}
 
-	public function actionTest($item_id, $checked) {
-		var_dump(ItemsHistory::countChecked($item_id, $checked));
+	public function actionTest() {
 	}
 
 	private function massDownload($urls, $folder) {

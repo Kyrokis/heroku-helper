@@ -54,10 +54,10 @@ $config = [
 		'db' => $db,
 		'queue' => [
 			'class' => \yii\queue\db\Queue::class,
-            'db' => 'db', // DB connection component or its config 
-            'tableName' => '{{%queue}}', // Table name
-            'channel' => 'default', // Queue channel key
-            'mutex' => \yii\mutex\PgsqlMutex::class, // Mutex used to sync queries
+			'db' => 'db', // DB connection component or its config 
+			'tableName' => '{{%queue}}', // Table name
+			'channel' => 'default', // Queue channel key
+			'mutex' => \yii\mutex\PgsqlMutex::class, // Mutex used to sync queries
 			'as log' => \yii\queue\LogBehavior::class,
 		],
 	],
@@ -68,6 +68,19 @@ $config = [
 		'user' => 'app\modules\user\UserModule',
 
 		'gridview' => '\kartik\grid\Module',
+		'datecontrol' =>  [
+			'class' => '\kartik\datecontrol\Module',
+			'autoWidget' => true,
+			'displaySettings' => [
+				kartik\datecontrol\DateControl::FORMAT_DATETIME => 'd.m.Y H:i',
+			],
+			'saveSettings' => [
+				kartik\datecontrol\DateControl::FORMAT_DATETIME => 'U',
+			],
+			'displayTimezone' => 'Europe/Moscow',
+			'saveTimezone' => 'UTC',
+		],
+
 		'debug' => [
 			'class' => 'yii\debug\Module',
 			'panels' => [

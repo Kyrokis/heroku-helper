@@ -132,8 +132,15 @@ echo GridView::widget([
 		],
 		[
 			'class' => yii\grid\ActionColumn::className(),
-			'template' => '{delete}',
+			'template' => '{update} {delete}',
 			'buttons' => [
+				'update' => function ($url, $model) {
+					$url = str_replace('update', 'update-history', $url);
+					return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
+						'title' => Yii::t('yii', 'Update'),
+						'data-pjax' => '0',
+					]);
+				},
 				'delete' => function ($url, $model) {
 					$url = str_replace('delete', 'delete-history', $url);
 					return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
@@ -145,6 +152,10 @@ echo GridView::widget([
 				},
 			],
 			'visibleButtons' => [
+				'update' => function ($model) {
+					$user = Yii::$app->user;
+					return ($user->identity->admin || $user->id == $model->item->user_id);
+				},
 				'delete' => function ($model) {
 					$user = Yii::$app->user;
 					return ($user->identity->admin || $user->id == $model->item->user_id);

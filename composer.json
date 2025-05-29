@@ -32,7 +32,9 @@
 		"vkcom/vk-php-sdk": "dev-master",
 		"marekpetras/yii2-calendarview-widget": "^1.0",
 		"jaeger/querylist": "*",
-		"yiisoft/yii2-queue": "^2.3"
+		"yiisoft/yii2-queue": "^2.3",
+		"kartik-v/yii2-widget-datetimepicker": "dev-master",
+		"kartik-v/yii2-datecontrol": "dev-master"
 	},
 	"require-dev": {
 		"yiisoft/yii2-gii": "~2.1.0",
