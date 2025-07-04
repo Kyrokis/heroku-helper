@@ -79,6 +79,11 @@ class template extends ActiveRecord {
 	 * @var string Link postfix
 	 */
 	public $full_link2;
+
+	/**
+	 * @var string Items count
+	 */
+	public $items_count;
 	
 
 	/**
@@ -93,7 +98,7 @@ class template extends ActiveRecord {
 	 */
 	public function rules() {
 		return [
-			[['id', 'user_id'], 'integer'],
+			[['id', 'user_id', 'items_count'], 'integer'],
 			[['name', 'type', 'del'], 'string'],
 			[['title1', 'title2', 'link_new1', 'link_new2', 'link_img1', 'link_img2', 'new1', 'new2', 'full_link1', 'full_link2', 'type', 'update_type', 'del'], 'string'],
 			[['name', 'type'], 'required'],
@@ -166,6 +171,7 @@ class template extends ActiveRecord {
 			'type' => 'Тип парсинга',
 			'update_type' => 'Обновлять, только, если не совпадает ссылка',
 			'del' => 'Удален',
+			'items_count' => 'Количество',
 		];
 	}
 
@@ -259,7 +265,12 @@ class template extends ActiveRecord {
 					->andWhere(['OR', ['template.user_id' => Yii::$app->user->id], ['IS', 'template.user_id', null]])->andWhere(['template.del' => '0'])
 					->groupBy('template.id')
 					->orderBy('items_count DESC');
-		return ArrayHelper::map($query->all(), 'id', 'name');
+		$items = $query->all();
+		$return = [];
+		foreach ($items as $item) {
+			$return[$item['id']] = "$item[name] ($item[items_count])";
+		}
+		return $return;
 	}
 
 	/**

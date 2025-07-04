@@ -76,10 +76,14 @@ var site = {};
 		var id = item.data('id');
 		$.get('/helper/default/check', {'id': id}).done(function (data) {
 			if (data) {
-				var titleNew = item.parent().prev().prev().children('a').html();
-				item.parent().prev().prev().prev().html(titleNew);
-				item.parent().prev().prev().children('input').remove();
-				item.parent().parent().removeClass('info');
+				var tr = item.parents('tr');
+				tr.find('td:nth-child(5)').html(tr.find('td:nth-child(6) a').html());
+				tr.find('td:nth-child(6) input').remove();
+				tr.removeClass('info');
+				var history = tr.find('td:nth-child(3) a:nth-child(2)');
+				if (history.attr('href').slice(-2) == '=0') {
+					history.attr('href', history.attr('href').slice(0, -1));
+				}
 				item.next().remove();
 				item.remove();
 			} else {
@@ -101,17 +105,22 @@ var site = {};
 		$.get('/helper/default/check-history', {'id': id, 'value': value, 'type': type}).done(function (data) {
 			if (data) {
 				if (type != '') {
+					var td = item.parent();
 					if (data == '1') {
 						if (type == 'first') {
-							item.parent().next().children('input').remove();
+							td.next().children('input').remove();
 						} else if (type == 'last') {
-							item.parent().prev().children('input').remove();
+							td.prev().children('input').remove();
 						}
-						item.parent().parent().removeClass('info');
+						td.parent().removeClass('info');
+						var history = td.parents('tr').find('td:nth-child(3) a:nth-child(2)');
+						if (history.attr('href').slice(-2) == '=0') {
+							history.attr('href', history.attr('href').slice(0, -1));
+						}
 						item.remove();
 					} else {
 						item.next().remove();
-						item.parent().html(data);
+						td.html(data);
 					}
 				}
 				console.log('Все прошло так');

@@ -103,15 +103,11 @@ echo GridView::widget([
 					$link = end($link);
 				} else if ($data->template->id == 8) {
 					$link = $link . '&fresh_load_' . time();
+					//$link = str_replace('nyaa.si', 'nyaa.digital', $link);
 					$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($link);
-				} else if ($data->template->name == 'SubsPlease') {
-					$link = 'https://nyaa.si/user/subsplease?f=0&c=0_0&q=' . $link . '&fresh_load_' . time();
-					$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($link);
-				} else if ($data->template->name == 'NanDesuKa') {
-					$link = 'https://nyaa.si/user/NanDesuKa?f=0&c=0_0&q=' . $link . '&fresh_load_' . time();
-					$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($link);
-				}
-				//$link = str_replace('nyaa.si', 'nyaa.land', $link);
+				} else if ($data->template->id == 49) {
+					$link = 'https://www.reddit.com/r/manga/search/?q=' . urlencode('"[DISC] ' . $link . ' -"') . '&type=posts&sort=new';
+				} 
 				return Html::a($data->title, $link, ['target' => '_blank']) . ' ' . Html::a('<span class="glyphicon glyphicon-time"></span>', ['/helper/default/history', 'ItemsHistory[item_id][]' => $data->id, 'ItemsHistory[checked]' => ($data->firstUnchecked ? '0' : '')], ['style' => 'color: #6c757d!important;', 'target' => '_blank', 'data-pjax' => '0']);
 			},
 			'filterInputOptions' => [

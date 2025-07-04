@@ -64,6 +64,7 @@ class Api {
 				$check = true;
 				break;
 			}
+			
 			$check = Helper::checkClude($new['now'], $value->exclude, $value->include);
 			$offset++;
 			if ($offset > $value->offset + 8) {

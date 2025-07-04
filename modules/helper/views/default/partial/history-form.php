@@ -9,7 +9,7 @@ use kartik\datecontrol\DateControl;
 $user = Yii::$app->user;
 $form = ActiveForm::begin(['options' => ['autocomplete' => 'off', 'class' => 'items-add']]);
 $attributes = [
-	'now' => [],
+	'now' => ['type' => Form::INPUT_TEXTAREA],
 	'link' => [],
 	'dt' => [
 		'type' => Form::INPUT_WIDGET,

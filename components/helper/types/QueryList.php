@@ -18,11 +18,16 @@ class QueryList {
 	 */
 	public static function getData($template, $value, $allFields) {
 		$link = $value->link;
-		if ($template->id == 8 || $template->id == 42 || $template->id == 40) {
-			//$link = str_replace('nyaa.si', 'nyaa.land', $value->link);
-			//$link = $value->link . '&fresh_load_' . time();
+		$title = '';
+		if ($template->id == 8) {
+			//$link = str_replace('nyaa.si', 'nyaa.digital', $value->link);
+			//$link = $link . '&fresh_load_' . time();
 			$link = 'https://freeproxy.io/o.php?b=4&u=' . urlencode($link. '&fresh_load_' . time());
 			//return false;
+		}
+		if ($template->id == 49) {
+			$title = $link;
+			$link = 'https://www.reddit.com/r/manga/search/?q=' . urlencode('"[DISC] ' . $link . ' -"') . '&type=posts&sort=new';
 		}
 		$html = \QL\QueryList::get($link, null, ['timeout' => 10])->getHtml();
 		$query = \QL\QueryList::html($html);
@@ -63,6 +68,13 @@ class QueryList {
 				];
 			}
 		} while (!$check);
+		if ($title) {
+			$new['title'] = $title;
+		}
+
+		if ($template->id == 18) {
+			$new['now'] = preg_replace('/\s+/', ' ', $new['now']);
+		}
 		return $new;
 	}
 }
