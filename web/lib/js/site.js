@@ -15,6 +15,19 @@ var site = {};
 		return false;
 	};
 
+	function formatDate(unixTimestamp) {
+		const date = new Date(unixTimestamp * 1000);
+		const formattedDate = [
+			date.getDate().toString().padStart(2, '0'),
+			(date.getMonth() + 1).toString().padStart(2, '0'),
+			date.getFullYear()
+		].join('.') + ' ' + [
+			date.getHours().toString().padStart(2, '0'),
+			date.getMinutes().toString().padStart(2, '0')
+		].join(':');
+		return formattedDate;
+	}
+
 	/**
 	 * Get data
 	 */
@@ -34,6 +47,8 @@ var site = {};
 			$('#items-link_img').val(data.link_img);
 			$('#items-link_new').val(data.link_new);
 			$('#items-now').val(data.now);
+			$('#items-dt_update').val(data.dt);
+			$('#items-dt_update-disp').val(formatDate(data.dt));
 		}).always(function () {
 			item.text('Загрузить').removeClass('disabled');
 		});

@@ -147,7 +147,8 @@ class DefaultController extends Controller {
 					'exclude' => $exclude,
 					'new' => '',
 					'now' => '',
-					'link_new' => ''
+					'link_new' => '',
+					'dt_update' => '',
 				];
 		$items = Helper::getData($template, $value, true);
 		$items['now'] = ($items['now'] != '') ? $items['now'] : $items['link_new'];
@@ -321,6 +322,7 @@ class DefaultController extends Controller {
 		} else if (!$model->offset) {
 			$model->offset = 0;
 		}
+		//$model->dt = $model->lastValue->dt ? : time();
 		return $this->render('update', ['model' => $model]);
 	}	
 

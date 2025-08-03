@@ -2,6 +2,7 @@
 
 use kartik\form\ActiveForm;
 use kartik\builder\Form;
+use kartik\datecontrol\DateControl;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\ArrayHelper;
@@ -78,6 +79,25 @@ $attributes = [
 					]
 				]
 			],
+		],
+	],
+	'dt_update' => [
+		'type' => Form::INPUT_WIDGET,
+		'widgetClass' => DateControl::className(),
+		'options' => [
+			'type' => DateControl::FORMAT_DATETIME,
+			'options'=>[
+				'value' => ($model->dt_update ? : time())
+			],
+			'displayFormat' => 'php:d.m.Y H:i',
+			'saveFormat' => 'php:U',
+			'ajaxConversion' => true,
+			'widgetOptions' => [
+				'pluginOptions' => [
+					'autoclose' => true,
+					'todayHighlight' => true,
+				]
+			]
 		],
 	],
 	'link_img' => [],

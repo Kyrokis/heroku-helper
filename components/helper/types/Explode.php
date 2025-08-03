@@ -31,8 +31,11 @@ class Explode {
 		}
 		do {
 			$new['now'] = Str::explode($template->new, $content, $offset);
-			//var_dump(json_decode($new['now'])); die;
-			//var_dump(($new['now'])); die;
+			$new['dt'] = time();
+			if ($template->dt) {
+				$dt = Str::explode($template->dt, $content, $offset);
+				$new['dt'] = is_int($dt) ? : strtotime($dt);
+			}
 			$new['link_new'] = Str::explode($template->link_new, $content, $offset);
 			if ($new['now'] == $value->now && $offset != $value->offset) {
 				$check = true;
@@ -44,6 +47,7 @@ class Explode {
 				$check = true;
 				$new['now'] = $value->new;
 				$new['link_new'] = $value->link_new;
+				$new['dt'] = $value->dt ? : time();
 			}
 		} while (!$check);
 		return $new;

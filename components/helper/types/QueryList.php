@@ -47,13 +47,23 @@ class QueryList {
 			];
 			$newTemplate['new'][0] = str_replace('{offset}', $offset, $newTemplate['new'][0]);
 			$newTemplate['link_new'][0] = str_replace('{offset}', $offset, $newTemplate['link_new'][0]);
-			$item = $query->rules([
-						'now' => $newTemplate['new'], 
-						'link_new' => $newTemplate['link_new']
-					])
-					->query()->getData()->all();
+			$rules = [
+				'now' => $newTemplate['new'], 
+				'link_new' => $newTemplate['link_new'],					
+			];
+			if ($template->dt) {
+				$newTemplate['dt'] = $template->dt->getValue();
+				$newTemplate['dt'][0] = str_replace('{offset}', $offset, $newTemplate['dt'][0]);
+				$rules['dt'] = $newTemplate['dt'];
+			}
+			$item = $query->rules($rules)->query()->getData()->all();
 			$new['now'] = $item['now'];
 			$new['link_new'] = $item['link_new'];
+			if (isset($item['dt'])) {
+				$new['dt'] = is_numeric($item['dt']) ? $item['dt'] : strtotime($item['dt']);
+			} else {
+				$new['dt'] = time();
+			}
 			if ($new['now'] == $value->now && $offset != $value->offset) {
 				$check = true;
 				break;
@@ -64,7 +74,8 @@ class QueryList {
 				$check = true;
 				$new = [
 					'now' => $value->now,
-					'link_new' => $value->link_new
+					'link_new' => $value->link_new,
+					'dt' => $value->dt_update
 				];
 			}
 		} while (!$check);

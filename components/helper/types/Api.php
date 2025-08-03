@@ -42,14 +42,17 @@ class Api {
 						'extended' => 1
 					]);
 		if ($allFields) {
+			$groupIndex = array_key_last($post['groups']);
 			$new = [
-				'title' => $post['groups'][0]['name'],
-				'link_img' => $post['groups'][0]['photo_200'],
+				'title' => $post['groups'][$groupIndex]['name'],
+				'link_img' => $post['groups'][$groupIndex]['photo_200'],
 			];
 		}
 		$offset = 0;
+		$items = $post['items'];
+		ArrayHelper::multisort($items, 'date', SORT_DESC);
 		do {
-			$item = $post['items'][$offset];
+			$item = $items[$offset];
 			$new['now'] = $item['text'];
 			if (isset($post['items'][$offset]['copy_history'])) {
 				$repost = $post['items'][$offset]['copy_history'][0];
@@ -60,6 +63,7 @@ class Api {
 				}
 			}
 			$new['link_new'] = '/wall' . $value->link . '_' . $item['id'];
+			$new['dt'] = $item['date'];
 			if ($new['now'] == $value->now && $offset != $value->offset) {
 				$check = true;
 				break;
@@ -67,10 +71,11 @@ class Api {
 			
 			$check = Helper::checkClude($new['now'], $value->exclude, $value->include);
 			$offset++;
-			if ($offset > $value->offset + 8) {
+			if ($offset > 9) {
 				$check = true;
-				$new['now'] = $value->new;
+				$new['now'] = $value->now;
 				$new['link_new'] = $value->link_new;
+				$new['dt'] = $value->dt_update;
 			}
 		} while (!$check);
 		\Yii::debug($offset);
@@ -113,7 +118,8 @@ class Api {
 		$content = $response->data['data'][0];
 		$new = [
 			'now' => 'Chapter ' . $content['attributes']['chapter'] . ($content['attributes']['title'] ? ': ' . $content['attributes']['title'] : ''),
-			'link_new' => $content['id']
+			'link_new' => $content['id'],
+			'dt' => strtotime($content['attributes']['createdAt'])
 		];
 		if ($allFields) {
 			foreach ($content['relationships'] as $relationship) {
@@ -134,8 +140,9 @@ class Api {
 		$chapters = array_reverse($response->data['data']);
 		$chapter = $chapters[$value->offset];
 		$new = [
-			'now' => $chapter['name'] ? : "Том $chapter[volume] Глава $chapter[number]", 
-			'link_new' => "https://mangalib.me/ru/$title/read/v$chapter[volume]/c$chapter[number]"
+			'now' => "Том $chapter[volume] Глава $chapter[number]" . ($chapter['name'] ? ' - ' . $chapter['name'] : ''), 
+			'link_new' => "https://mangalib.me/ru/$title/read/v$chapter[volume]/c$chapter[number]",
+			'dt' => strtotime($chapter['branches'][0]['created_at']),
 		];
 		if ($allFields) {
 			$clientTitle = new Client();

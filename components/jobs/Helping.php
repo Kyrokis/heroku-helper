@@ -61,7 +61,7 @@ class Helping extends BaseObject implements \yii\queue\JobInterface {
 				if (($template->update_type == '0' && $new['now'] != $value->new) || ($template->update_type == '1' && $new['link_new'] != $value->link_new)) {
 					$model->new = $new['now'];
 					$model->link_new = $new['link_new'];
-					$model->dt_update = time();
+					$model->dt_update = $new['dt'] ? : time();
 					$error = '0';
 				}
 				$model->error = '0';

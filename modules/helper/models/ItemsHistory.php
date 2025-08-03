@@ -85,12 +85,12 @@ class ItemsHistory extends ActiveRecord {
 	 * @param stirng $link - Now link
 	 * @return boolean
 	 */
-	public static function add($item_id, $now, $link) {
+	public static function add($item_id, $now, $link, $dt = null) {
 		$model = new self;
 		$model->item_id = $item_id;
 		$model->now = $now;
 		$model->link = $link;
-		$model->dt = time();
+		$model->dt = $dt ? : time();
 		return $model->save();
 	}
 

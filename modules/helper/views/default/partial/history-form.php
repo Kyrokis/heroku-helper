@@ -3,7 +3,6 @@
 use kartik\form\ActiveForm;
 use kartik\builder\Form;
 use yii\helpers\Html;
-use kartik\widgets\DateTimePicker;
 use kartik\datecontrol\DateControl;
 
 $user = Yii::$app->user;

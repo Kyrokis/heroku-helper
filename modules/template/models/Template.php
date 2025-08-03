@@ -81,6 +81,16 @@ class template extends ActiveRecord {
 	public $full_link2;
 
 	/**
+	 * @var string Link prefix
+	 */
+	public $dt1;
+
+	/**
+	 * @var string Link postfix
+	 */
+	public $dt2;
+
+	/**
 	 * @var string Items count
 	 */
 	public $items_count;
@@ -100,10 +110,10 @@ class template extends ActiveRecord {
 		return [
 			[['id', 'user_id', 'items_count'], 'integer'],
 			[['name', 'type', 'del'], 'string'],
-			[['title1', 'title2', 'link_new1', 'link_new2', 'link_img1', 'link_img2', 'new1', 'new2', 'full_link1', 'full_link2', 'type', 'update_type', 'del'], 'string'],
+			[['title1', 'title2', 'link_new1', 'link_new2', 'link_img1', 'link_img2', 'new1', 'new2', 'full_link1', 'full_link2', 'dt1', 'dt2', 'type', 'update_type', 'del'], 'string'],
 			[['name', 'type'], 'required'],
-			[['title', 'link_new', 'link_img', 'new', 'full_link'], 'each', 'rule' => ['string']],
-			[['title1', 'title2', 'link_new1', 'link_new2', 'new1', 'new2'], 'required', 'when' => function($model) {return $model->type != 2;}, 
+			[['title', 'link_new', 'link_img', 'new', 'full_link', 'dt'], 'each', 'rule' => ['string']],
+			[['title1', 'title2', 'link_new1', 'link_new2', 'new1', 'new2', 'dt1', 'dt2'], 'required', 'when' => function($model) {return $model->type != 2;}, 
 																						'whenClient' => "function (attribute, value) { return $('#template-type').val() != '2'; }"],
 			[['title'], 'safe', 'on' => self::SCENARIO_SEARCH],
 		];
@@ -167,6 +177,9 @@ class template extends ActiveRecord {
 			'full_link' => 'Полная ссылка',
 			'full_link1' => 'Префикс ссылки',
 			'full_link2' => 'Постфикс ссылки',
+			'dt' => 'Дата записи',
+			'dt1' => 'Дата записи 1',
+			'dt2' => 'Дата записи 2',
 			'user_id' => 'ID юзера',
 			'type' => 'Тип парсинга',
 			'update_type' => 'Обновлять, только, если не совпадает ссылка',
@@ -184,6 +197,7 @@ class template extends ActiveRecord {
 		$this->link_new = [$this->link_new1, $this->link_new2];
 		$this->link_img = [$this->link_img1, $this->link_img2];
 		$this->full_link = [$this->full_link1, $this->full_link2];
+		$this->dt = [$this->dt1, $this->dt2];
 		return parent::beforeValidate();
 	}
 
@@ -212,6 +226,10 @@ class template extends ActiveRecord {
 			if ($this->full_link) {
 				$this->full_link1 = $this->full_link[0];
 				$this->full_link2 = $this->full_link[1];
+			}	
+			if ($this->dt) {
+				$this->dt1 = $this->dt[0];
+				$this->dt2 = $this->dt[1];
 			}	
 		}
 		return $flag;

@@ -53,6 +53,7 @@ class Items extends ActiveRecord {
 	 */
 	public $titleReplace;
 
+
 	/**
 	 * @return string
 	 */
@@ -190,7 +191,6 @@ class Items extends ActiveRecord {
 		if ($insert) {
 			if ($this->new == '') {
 				$this->new = $this->now;
-				$this->dt_update = time();
 			}
 			$this->user_id = Yii::$app->user->id;
 		}
@@ -203,8 +203,8 @@ class Items extends ActiveRecord {
 	public function afterSave($insert, $changedAttributes) {
 		if ($insert || isset($changedAttributes['new']) || isset($changedAttributes['link_new'])) {
 			$fullLink = Template::getFullLink($this->link_new, $this->id_template);
-			if (!ItemsHistory::find()->andFilterWhere(['now' => $this->new, 'link' => $fullLink])->one()) {
-				ItemsHistory::add($this->id, $this->new, $fullLink);
+			if (!ItemsHistory::find()->andFilterWhere(['item_id' => $this->id, 'now' => $this->new, 'link' => $fullLink])->one()) {
+				ItemsHistory::add($this->id, $this->new, $fullLink, $this->dt_update);
 			}
 		}
 		return parent::afterSave($insert, $changedAttributes);
